@@ -6,11 +6,16 @@ import { AppMenuComponent } from './menu/menu.component';
 import { AppTooltipsComponent } from './tooltips/tooltips.component';
 import { AppFormsComponent } from './forms/forms.component';
 import { AppTablesComponent } from './tables/tables.component';
+import { CreateProductComponent } from './create-product/create-product..component';
 
-export const UiComponentsRoutes: Routes = [
+export const manageProductsRoutes: Routes = [
   {
     path: '',
     children: [
+      {
+        path: 'create-product',
+        component: CreateProductComponent,
+      },
       {
         path: 'badge',
         component: AppBadgeComponent,

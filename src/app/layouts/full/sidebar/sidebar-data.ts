@@ -2,77 +2,40 @@ import { NavItem } from './nav-item/nav-item';
 
 export const navItems: NavItem[] = [
   {
-    navCap: 'Головна',
-  },
-  {
     displayName: 'Панель',
     iconName: 'layout-grid-add',
     route: '/dashboard',
   },
 
   {
-    navCap: 'Управління товарами',
-  },
-
-  {
-    displayName: 'Створити новий',
-    iconName: 'layout-grid-add',
-    route: '/dashboard',
-  },
-
-  {
-    navCap: 'Ui Components',
-  },
-  {
-    displayName: 'Badge',
-    iconName: 'archive',
-    route: '/ui-components/badge',
-  },
-  {
-    displayName: 'Menu',
-    iconName: 'file-text',
-    route: '/ui-components/menu',
-  },
-  {
-    displayName: 'Tooltips',
-    iconName: 'file-text-ai',
-    route: '/ui-components/tooltips',
-  },
-  {
-    displayName: 'Forms',
-    iconName: 'clipboard-text',
-    route: '/ui-components/forms',
-  },
-  {
-    displayName: 'Tables',
+    displayName: 'Управління товарами',
     iconName: 'table',
-    route: '/ui-components/tables',
-  },
-
-  {
-    navCap: 'Auth',
-  },
-  {
-    displayName: 'Login',
-    iconName: 'login',
-    route: '/authentication',
+    route: '/manage-products/tables',
     children: [
       {
-        displayName: 'Login',
-        iconName: 'point',
-        route: '/authentication/login',
+        displayName: 'Створити продукт',
+        iconName: 'archive',
+        route: '/manage-products/create-product',
       },
-    ],
-  },
-  {
-    displayName: 'Register',
-    iconName: 'user-plus',
-    route: '/authentication',
-    children: [
       {
-        displayName: 'Register',
-        iconName: 'point',
-        route: '/authentication/register',
+        displayName: 'Badge',
+        iconName: 'archive',
+        route: '/manage-products/badge',
+      },
+      {
+        displayName: 'Menu',
+        iconName: 'file-text',
+        route: '/manage-products/menu',
+      },
+      {
+        displayName: 'Tooltips',
+        iconName: 'file-text-ai',
+        route: '/manage-products/tooltips',
+      },
+      {
+        displayName: 'Forms',
+        iconName: 'clipboard-text',
+        route: '/manage-products/forms',
       },
     ],
   },

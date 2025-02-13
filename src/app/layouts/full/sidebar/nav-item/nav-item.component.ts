@@ -41,7 +41,7 @@ export class AppNavItemComponent implements OnChanges {
     }
   }
 
-  onItemSelected(item: NavItem) {
+  public onItemSelected(item: NavItem) {
     if (!item.children || !item.children.length) {
       this.router.navigate([item.route]);
     }
@@ -61,13 +61,13 @@ export class AppNavItemComponent implements OnChanges {
     }
   }
 
-  openExternalLink(url: string): void {
+  public openExternalLink(url: string): void {
     if (url) {
       window.open(url, '_blank');
     }
   }
 
-  onSubItemSelected(item: NavItem) {
+  public onSubItemSelected(item: NavItem) {
     if (!item.children || !item.children.length) {
       if (this.expanded && window.innerWidth < 1024) {
         this.notify.emit();

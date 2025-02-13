@@ -4,7 +4,8 @@
   <button
     mat-icon-button
     (click)="toggleMobileNav.emit()"
-    class="d-flex d-lg-none justify-content-center">
+    class="d-flex d-lg-none justify-content-center"
+  >
     <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
   </button>
 
@@ -40,27 +41,11 @@
         ><i-tabler name="user" class="icon-18 d-flex"></i-tabler></mat-icon
       >My Profile
     </button>
-    <button mat-menu-item>
-      <mat-icon class="d-flex align-items-center"
-        ><i-tabler name="mail" class="icon-18 d-flex"></i-tabler></mat-icon
-      >My Account
-    </button>
-    <button mat-menu-item>
-      <mat-icon class="d-flex align-items-center"
-        ><i-tabler
-          name="list-check"
-          class="icon-18 d-flex"
-        ></i-tabler></mat-icon
-      >My Task
-    </button>
 
-    <div class="p-x-12 m-t-12">
-      <a
-        [routerLink]="['/authentication/login']"
-        mat-stroked-button
-        class="w-100"
-        >Logout</a
-      >
-    </div>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon class="d-flex align-items-center">
+        <i-tabler name="logout" class="icon-18 d-flex"></i-tabler></mat-icon>
+      Logout
+    </button>
   </mat-menu>
 </mat-toolbar>

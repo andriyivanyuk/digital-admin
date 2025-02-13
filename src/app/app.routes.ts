@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { FullComponent } from './layouts/full/full.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -9,7 +10,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/authentication/login',
         pathMatch: 'full',
       },
       {
@@ -18,13 +19,14 @@ export const routes: Routes = [
           import('./pages/pages.routes').then((m) => m.PagesRoutes),
       },
       {
-        path: 'ui-components',
+        path: 'manage-products',
         loadChildren: () =>
-          import('./pages/ui-components/ui-components.routes').then(
-            (m) => m.UiComponentsRoutes
+          import('./pages/manage-products/manage-products.routes').then(
+            (m) => m.manageProductsRoutes
           ),
       },
     ],
+    canActivate: [AuthGuard],
   },
   {
     path: '',
@@ -38,6 +40,7 @@ export const routes: Routes = [
           ),
       },
     ],
+    canActivate: [AuthGuard],
   },
   {
     path: '**',

@@ -17,35 +17,31 @@
             </a>
           </div>
 
-          <form class="m-t-30">
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
-              >Username</mat-label
-            >
+          <form class="m-t-30" [formGroup]="form">
+            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Email</mat-label>
             <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput />
-            </mat-form-field>
-            <!-- password -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
-              >Password</mat-label
-            >
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput type="password" />
+              <input formControlName="email" matInput type="email" />
             </mat-form-field>
 
-            <div class="d-flex align-items-center m-b-12">
+            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Пароль</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input formControlName="password" matInput type="password" />
+            </mat-form-field>
+
+            <!-- <div class="d-flex align-items-center m-b-12">
               <mat-checkbox color="primary">Remember this Device</mat-checkbox>
               <a
                 [routerLink]="['/']"
                 class="text-primary f-w-600 text-decoration-none m-l-auto f-s-14"
                 >Forgot Password ?</a
               >
-            </div>
+            </div> -->
             <a
-              [routerLink]="['/']"
+              (click)="signIn()"
               mat-flat-button
               color="primary"
               class="w-100"
-            >
+              [disabled]="form.invalid">
               Sign In
             </a>
             <!-- input -->
