@@ -7,6 +7,7 @@ import { AppTooltipsComponent } from './tooltips/tooltips.component';
 import { AppFormsComponent } from './forms/forms.component';
 import { AppTablesComponent } from './tables/tables.component';
 import { CreateProductComponent } from './create-product/create-product..component';
+import { CreateCategoryComponent } from './create-category/create-category.component';
 
 export const manageProductsRoutes: Routes = [
   {
@@ -15,6 +16,10 @@ export const manageProductsRoutes: Routes = [
       {
         path: 'create-product',
         component: CreateProductComponent,
+      },
+      {
+        path: 'create-category',
+        component: CreateCategoryComponent,
       },
       {
         path: 'badge',

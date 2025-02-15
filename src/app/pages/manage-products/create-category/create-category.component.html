@@ -1,0 +1,41 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">Створити категорію</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="b-t-1">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">Назва</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input formControlName="title" matInput placeholder="Категорія" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-6">
+          <mat-label class="f-w-600 m-b-8 d-block">Опис</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <textarea
+              formControlName="description"
+              matInput
+              placeholder="Опис"
+              rows="4"
+            ></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="m-t-12 d-flex justify-content-end gap-16">
+        <button
+          [disabled]="form.invalid"
+          mat-flat-button
+          color="primary"
+          class="m-r-8"
+          (click)="createCategory()">
+          Створити
+        </button>
+        <button mat-stroked-button color="warn">Відміна</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
