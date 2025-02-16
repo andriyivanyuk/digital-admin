@@ -16,6 +16,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-create-category',
+  templateUrl: './create-category.component.html',
+  styleUrls: ['./create-category.component.scss'],
   imports: [
     MatFormFieldModule,
     FormsModule,
@@ -25,7 +27,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatCardModule,
     MatInputModule,
   ],
-  templateUrl: './create-category.component.html',
   providers: [CategoryService],
 })
 export class CreateCategoryComponent implements OnInit {
@@ -53,7 +54,7 @@ export class CreateCategoryComponent implements OnInit {
     };
     this.categoryService.createCategory(request).subscribe({
       next: () => {
-        this.snackBar.open('Категорію додано', 'Close', {
+        this.snackBar.open('Категорію додано', 'Закрити', {
           duration: 3000,
         });
         this.form.reset();
@@ -64,7 +65,7 @@ export class CreateCategoryComponent implements OnInit {
     });
   }
 
-  public clearForm() {
+  public clear() {
     this.form.reset();
   }
   ngOnInit(): void {

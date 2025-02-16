@@ -15,13 +15,17 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Створити категорію',
-    iconName: 'archive',
+    iconName: 'folder-plus',
     route: '/manage-products/create-category',
   },
   {
     displayName: 'Створити продукт',
-    iconName: 'archive',
+    iconName: 'circle-plus',
     route: '/manage-products/create-product',
+  },
+
+  {
+    navCap: 'Елементи',
   },
 
   {

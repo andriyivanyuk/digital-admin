@@ -1,0 +1,37 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title class="m-b-0">Додати атрибут</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="b-t-1">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Назва атрибута</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input formControlName="key" matInput placeholder="Назва" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Значення</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input formControlName="value" matInput placeholder="Значення" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="m-t-12 btn-group" (click)="save()">
+        <button
+          mat-flat-button
+          color="primary"
+          class="m-r-8"
+          [disabled]="form.invalid">
+          Додати
+        </button>
+        <button mat-stroked-button color="warn" (click)="close()">
+          Закрити
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
