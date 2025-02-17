@@ -19,7 +19,7 @@ import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/at
 import { MatIconModule } from '@angular/material/icon';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
-import { first, Observable } from 'rxjs';
+import { BehaviorSubject, first, map, Observable } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
 import { CategoryService } from 'src/app/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
@@ -67,6 +67,10 @@ export class CreateProductComponent implements OnInit {
 
   readonly snackBar = inject(MatSnackBar);
 
+  selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'не вибрано'
+  );
+
   constructor(
     private fb: FormBuilder,
     private productStatusService: ProductStatusService,
@@ -81,19 +85,6 @@ export class CreateProductComponent implements OnInit {
     this.prefillForm();
   }
 
-  public onFileSelected(event: Event, index: number): void {
-    const element = event.target as HTMLInputElement;
-    let files: FileList | null = element.files;
-
-    if (files && files.length > 0) {
-      const file = files[0];
-      this.imageItems[index] = { ...this.imageItems[index], file: file };
-      if (this.imageItems.every((item) => !item.isPrimary)) {
-        // console.log('this condition is working');
-      }
-    }
-  }
-
   public setPrimaryImage(index: number): void {
     this.imageItems.forEach((item, i) => (item.isPrimary = i === index));
     this.form.patchValue({ primaryImageIndex: index });
@@ -103,17 +94,37 @@ export class CreateProductComponent implements OnInit {
     return this.form.get('attributes') as FormArray;
   }
 
+  get images(): FormArray {
+    return this.form.get('images') as FormArray;
+  }
+
   public createForm() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
-      primaryImageIndex: ['', Validators.required],
       price: [''],
       stock: [''],
       status_id: [0],
       category_id: [0],
       description: [''],
       attributes: this.fb.array([]),
+      primaryImageIndex: ['0', Validators.required],
+      images: this.fb.array([]),
     });
+
+    this.form
+      .get('primaryImageIndex')!
+      .valueChanges.pipe(
+        map((index) => {
+          const image = this.images.at(index);
+          return image ? `Фото ${parseInt(index, 10) + 1}` : 'не вибрано';
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          console.log(result);
+          this.selectedImageName.next(result);
+        },
+      });
   }
 
   public addAttribute(): void {
@@ -145,6 +156,46 @@ export class CreateProductComponent implements OnInit {
     });
   }
 
+  public onFileSelect(event: Event) {
+    const element = event.currentTarget as HTMLInputElement;
+    let files = element.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        let reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.images.push(
+            this.fb.group({
+              file: [file],
+              path: [e.target.result], // Base64 string for preview
+            })
+          );
+          this.updateSelectedImageName(this.images.length - 1);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+
+  public deleteImage(index: number) {
+    this.images.removeAt(index);
+    if (this.images.length === 0) {
+      this.selectedImageName.next('Будь ласка, оберіть головне фото');
+    } else if (this.form.value.primaryImageIndex >= this.images.length) {
+      this.updateSelectedImageName(this.images.length - 1);
+    } else {
+      return;
+    }
+  }
+
+  private updateSelectedImageName(index: number) {
+    const image = this.images.at(index);
+    const imageName = image
+      ? `Фото ${parseInt(index.toString(), 10) + 1}`
+      : 'Будь ласка, оберіть головне фото';
+    this.selectedImageName.next(imageName);
+    this.form.patchValue({ primaryImageIndex: index });
+  }
+
   public createProduct() {
     if (this.form.valid) {
       const formData = new FormData();
@@ -156,12 +207,16 @@ export class CreateProductComponent implements OnInit {
       formData.append('category_id', this.form.get('category_id')?.value);
       formData.append('status_id', this.form.get('status_id')?.value);
 
-      this.imageItems.forEach((img, index) => {
-        if (img.file) {
-          formData.append('images', img.file, img.file.name);
-          if (img.isPrimary) {
-            formData.append('primary', index.toString());
-          }
+      const images = this.images.controls;
+      images.forEach((imageControl, index) => {
+        const file = imageControl.get('file')!.value;
+        formData.append('images', file, file.name);
+
+        if (
+          index.toString() ===
+          this.form.get('primaryImageIndex')!.value.toString()
+        ) {
+          formData.append('primary', index.toString());
         }
       });
 

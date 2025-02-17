@@ -84,28 +84,33 @@
         </div>
 
         <div class="col-12">
-          <mat-label class="f-w-600 m-b-8 d-block">Зображення товару</mat-label>
-          <mat-radio-group
-            aria-label="Select primary image"
-            formControlName="primaryImageIndex"
-            (change)="setPrimaryImage($event.value)"
+          <input type="file" (change)="onFileSelect($event)" multiple />
+          <div
+            formArrayName="images"
+            *ngFor="let image of images.controls; let i = index"
           >
-            @for(img of imageItems; track index; let index = $index) {
-            <div>
-              <input
-                type="file"
-                (change)="onFileSelected($event, index)"
-                accept="image/*"
+            <div [formGroupName]="i">
+              <img
+                [src]="image.get('path')!.value"
+                style="width: 100px; height: auto"
               />
-              <mat-radio-button
-                [value]="index"
-                [checked]="img.isPrimary"
-                name="primaryImageGroup"
-                >Основне фото</mat-radio-button
-              >
+              <button type="button" (click)="deleteImage(i)">Delete</button>
             </div>
-            }
-          </mat-radio-group>
+          </div>
+
+          <select formControlName="primaryImageIndex">
+            <option value="" disabled *ngIf="images.length === 0" selected>
+              Будь ласка, оберіть головне фото
+            </option>
+            <option
+              *ngFor="let image of images.controls; let i = index"
+              [value]="i"
+            >
+              {{ "Фото " + (i + 1) }}
+            </option>
+          </select>
+
+          <p>Зараз вибрано фото: {{ selectedImageName | async }}</p>
         </div>
 
         <div class="col-12">
