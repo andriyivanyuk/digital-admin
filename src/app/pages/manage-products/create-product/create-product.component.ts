@@ -19,7 +19,7 @@ import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/at
 import { MatIconModule } from '@angular/material/icon';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
-import { BehaviorSubject, first, map, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
 import { CategoryService } from 'src/app/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
@@ -64,7 +64,6 @@ export class CreateProductComponent implements OnInit {
   categories$!: Observable<Category[]>;
 
   readonly dialog = inject(MatDialog);
-
   readonly snackBar = inject(MatSnackBar);
 
   selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
@@ -78,24 +77,17 @@ export class CreateProductComponent implements OnInit {
     private productService: ProductService
   ) {}
 
-  ngOnInit(): void {
-    this.statuses$ = this.productStatusService.statuses$;
-    this.categories$ = this.categoryService.getCategories();
-    this.createForm();
-    this.prefillForm();
-  }
-
-  public setPrimaryImage(index: number): void {
-    this.imageItems.forEach((item, i) => (item.isPrimary = i === index));
-    this.form.patchValue({ primaryImageIndex: index });
-  }
-
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
   }
 
   get images(): FormArray {
     return this.form.get('images') as FormArray;
+  }
+
+  public setPrimaryImage(index: number): void {
+    this.form.patchValue({ primaryImageIndex: index });
+    this.updateSelectedImageName(index);
   }
 
   public createForm() {
@@ -110,21 +102,6 @@ export class CreateProductComponent implements OnInit {
       primaryImageIndex: ['0', Validators.required],
       images: this.fb.array([]),
     });
-
-    this.form
-      .get('primaryImageIndex')!
-      .valueChanges.pipe(
-        map((index) => {
-          const image = this.images.at(index);
-          return image ? `Фото ${parseInt(index, 10) + 1}` : 'не вибрано';
-        })
-      )
-      .subscribe({
-        next: (result) => {
-          console.log(result);
-          this.selectedImageName.next(result);
-        },
-      });
   }
 
   public addAttribute(): void {
@@ -166,7 +143,7 @@ export class CreateProductComponent implements OnInit {
           this.images.push(
             this.fb.group({
               file: [file],
-              path: [e.target.result], // Base64 string for preview
+              path: [e.target.result],
             })
           );
           this.updateSelectedImageName(this.images.length - 1);
@@ -180,10 +157,9 @@ export class CreateProductComponent implements OnInit {
     this.images.removeAt(index);
     if (this.images.length === 0) {
       this.selectedImageName.next('Будь ласка, оберіть головне фото');
+      this.form.patchValue({ primaryImageIndex: index });
     } else if (this.form.value.primaryImageIndex >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
-    } else {
-      return;
     }
   }
 
@@ -237,5 +213,12 @@ export class CreateProductComponent implements OnInit {
         },
       });
     }
+  }
+
+  ngOnInit(): void {
+    this.statuses$ = this.productStatusService.statuses$;
+    this.categories$ = this.categoryService.getCategories();
+    this.createForm();
+    this.prefillForm();
   }
 }

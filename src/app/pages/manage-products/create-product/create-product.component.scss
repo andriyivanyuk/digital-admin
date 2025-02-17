@@ -9,3 +9,21 @@
 .main-form {
   max-width: 800px;
 }
+
+.selected-image {
+  border: 2px solid rgb(93, 135, 255);
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.img-upload {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  justify-content: space-between;
+  max-width: 155px;
+}
+
+mat-icon {
+  cursor: pointer;
+}

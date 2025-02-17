@@ -84,50 +84,20 @@
         </div>
 
         <div class="col-12">
-          <input type="file" (change)="onFileSelect($event)" multiple />
-          <div
-            formArrayName="images"
-            *ngFor="let image of images.controls; let i = index"
-          >
-            <div [formGroupName]="i">
-              <img
-                [src]="image.get('path')!.value"
-                style="width: 100px; height: auto"
-              />
-              <button type="button" (click)="deleteImage(i)">Delete</button>
-            </div>
-          </div>
-
-          <select formControlName="primaryImageIndex">
-            <option value="" disabled *ngIf="images.length === 0" selected>
-              Будь ласка, оберіть головне фото
-            </option>
-            <option
-              *ngFor="let image of images.controls; let i = index"
-              [value]="i"
-            >
-              {{ "Фото " + (i + 1) }}
-            </option>
-          </select>
-
-          <p>Зараз вибрано фото: {{ selectedImageName | async }}</p>
-        </div>
-
-        <div class="col-12">
           <mat-label class="f-w-600 m-b-8 d-block">Атрибути товару</mat-label>
           <div
             class="d-flex align-items-center attribute-add"
             (click)="addAttribute()"
           >
             <mat-icon class="d-flex align-items-center">
-              <i-tabler name="category-plus" class="icon-18 d-flex"></i-tabler>
+              <i-tabler name="hexagon-plus" class="icon-18 d-flex"></i-tabler>
             </mat-icon>
             <span>Додати атрибут</span>
           </div>
           <ng-container formArrayName="attributes">
             @for(attr of attributes.controls; track attr.value; let index =
             $index) {
-            <div class="col-lg-6" [formGroupName]="index">
+            <div [formGroupName]="index">
               <mat-label class="f-w-600 m-b-8 d-block">
                 {{ attr.value.key }}
               </mat-label>
@@ -145,6 +115,36 @@
             </div>
             }
           </ng-container>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block m-t-20"
+            >Зображення товару (Оберіть головне зображення)</mat-label
+          >
+          <input type="file" (change)="onFileSelect($event)" multiple />
+          @for(image of images.controls; track image; let index = $index) {
+          @if(images.controls.length) {
+          <div formArrayName="images">
+            <div [formGroupName]="index" class="img-upload">
+              <img
+                [src]="image.get('path')!.value"
+                [class.selected-image]="
+                  index === form.get('primaryImageIndex')!.value
+                "
+                style="width: 100px; height: auto"
+                (click)="setPrimaryImage(index)"
+              />
+              <mat-icon
+                class="d-flex align-items-center"
+                (click)="deleteImage(index)"
+              >
+                <i-tabler name="trash" class="icon-18 d-flex"></i-tabler>
+              </mat-icon>
+            </div>
+          </div>
+          } }
+
+          <p>Зараз вибрано фото: {{ selectedImageName | async }}</p>
         </div>
       </div>
 
