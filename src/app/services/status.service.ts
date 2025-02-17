@@ -1,27 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, Observable, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  Observable,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { ProductStatus } from '../models/productStatus';
 
 @Injectable()
 export class ProductStatusService {
-  private apiUrl = 'http://localhost:5000/api';
+  private destroy$ = new Subject<void>();
 
-  private statuses = new BehaviorSubject<any[]>([]);
+  private apiUrl = 'http://localhost:5000/api';
+  private statuses = new BehaviorSubject<ProductStatus[]>([]);
   public statuses$ = this.statuses.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.loadInitialStatuses();
+  }
 
-  public getStatuses(): Observable<ProductStatus[]> {
-    return this.http
+  private loadInitialStatuses() {
+    this.http
       .get<ProductStatus[]>(this.apiUrl + '/product/statuses')
-      .pipe(
-        tap((statuses) => {
-          return this.statuses.next(statuses);
-        }),
-        catchError((error) => {
-          throw 'error in getting statuses: ' + error;
-        })
-      );
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (statuses) => this.statuses.next(statuses),
+        error: (error) => {
+          console.error('error in getting statuses: ', error);
+        },
+      });
   }
 }

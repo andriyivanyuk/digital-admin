@@ -26,6 +26,7 @@ import { ProductService } from 'src/app/services/products.service';
 import { TransformStatusesPipe } from 'src/app/pipe/transformStatuses.pipe';
 import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface ImageItem {
   file: File | null;
@@ -64,6 +65,8 @@ export class CreateProductComponent implements OnInit {
 
   readonly dialog = inject(MatDialog);
 
+  readonly snackBar = inject(MatSnackBar);
+
   constructor(
     private fb: FormBuilder,
     private productStatusService: ProductStatusService,
@@ -72,7 +75,7 @@ export class CreateProductComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.statuses$ = this.productStatusService.getStatuses();
+    this.statuses$ = this.productStatusService.statuses$;
     this.categories$ = this.categoryService.getCategories();
     this.createForm();
     this.prefillForm();
@@ -86,7 +89,7 @@ export class CreateProductComponent implements OnInit {
       const file = files[0];
       this.imageItems[index] = { ...this.imageItems[index], file: file };
       if (this.imageItems.every((item) => !item.isPrimary)) {
-        this.setPrimaryImage(index);
+        // console.log('this condition is working');
       }
     }
   }
@@ -132,7 +135,7 @@ export class CreateProductComponent implements OnInit {
   }
 
   public prefillForm() {
-    this.statuses$.pipe(first()).subscribe({
+    this.productStatusService.statuses$.subscribe({
       next: (result) => {
         const status = result.find((status) => status.status_id);
         if (status) {
@@ -170,6 +173,9 @@ export class CreateProductComponent implements OnInit {
       this.productService.addProduct(formData).subscribe({
         next: () => {
           this.form.reset();
+          this.snackBar.open('Продукт створено', 'Закрити', {
+            duration: 3000,
+          });
         },
         error: (error) => {
           console.error('Помилка при додаванні продукту:', error);

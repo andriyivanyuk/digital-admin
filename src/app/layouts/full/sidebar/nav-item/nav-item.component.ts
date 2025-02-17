@@ -54,11 +54,11 @@ export class AppNavItemComponent implements OnChanges {
       left: 0,
       behavior: 'smooth',
     });
-    if (!this.expanded) {
-      if (window.innerWidth < 1024) {
-        this.notify.emit();
-      }
-    }
+    // if (!this.expanded) {
+    //   if (window.innerWidth < 1024) {
+    //     this.notify.emit();
+    //   }
+    // }
   }
 
   public openExternalLink(url: string): void {

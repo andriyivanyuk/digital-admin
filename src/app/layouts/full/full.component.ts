@@ -60,16 +60,16 @@ export class FullComponent implements OnInit {
     private breakpointObserver: BreakpointObserver
   ) {
     this.htmlElement = document.querySelector('html')!;
-    this.layoutChangesSubscription = this.breakpointObserver
-      .observe([MOBILE_VIEW, TABLET_VIEW])
-      .subscribe((state) => {
-        // SidenavOpened must be reset true when layout changes
-        this.options.sidenavOpened = true;
-        this.isMobileScreen = state.breakpoints[MOBILE_VIEW];
-        if (this.options.sidenavCollapsed == false) {
-          this.options.sidenavCollapsed = state.breakpoints[TABLET_VIEW];
-        }
-      });
+    // this.layoutChangesSubscription = this.breakpointObserver
+    //   .observe([MOBILE_VIEW, TABLET_VIEW])
+    //   .subscribe((state) => {
+    //     // SidenavOpened must be reset true when layout changes
+    //     this.options.sidenavOpened = true;
+    //     this.isMobileScreen = state.breakpoints[MOBILE_VIEW];
+    //     if (this.options.sidenavCollapsed == false) {
+    //       this.options.sidenavCollapsed = state.breakpoints[TABLET_VIEW];
+    //     }
+    //   });
 
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
