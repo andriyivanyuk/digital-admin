@@ -13,6 +13,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatRadioModule } from '@angular/material/radio';
+
 import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -24,6 +26,11 @@ import { ProductService } from 'src/app/services/products.service';
 import { TransformStatusesPipe } from 'src/app/pipe/transformStatuses.pipe';
 import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
+
+interface ImageItem {
+  file: File | null;
+  isPrimary: boolean;
+}
 
 @Component({
   selector: 'app-create-product',
@@ -42,11 +49,13 @@ import { Category } from 'src/app/models/category';
     TransformStatusesPipe,
     CommonModule,
     MatDialogModule,
+    MatRadioModule,
   ],
   providers: [ProductStatusService, CategoryService, ProductService],
 })
 export class CreateProductComponent implements OnInit {
   form!: FormGroup;
+  imageItems: ImageItem[] = Array(5).fill({ file: null, isPrimary: false });
 
   selectedFile: File | null = null;
 
@@ -69,6 +78,24 @@ export class CreateProductComponent implements OnInit {
     this.prefillForm();
   }
 
+  public onFileSelected(event: Event, index: number): void {
+    const element = event.target as HTMLInputElement;
+    let files: FileList | null = element.files;
+
+    if (files && files.length > 0) {
+      const file = files[0];
+      this.imageItems[index] = { ...this.imageItems[index], file: file };
+      if (this.imageItems.every((item) => !item.isPrimary)) {
+        this.setPrimaryImage(index);
+      }
+    }
+  }
+
+  public setPrimaryImage(index: number): void {
+    this.imageItems.forEach((item, i) => (item.isPrimary = i === index));
+    this.form.patchValue({ primaryImageIndex: index });
+  }
+
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
   }
@@ -76,6 +103,7 @@ export class CreateProductComponent implements OnInit {
   public createForm() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
+      primaryImageIndex: ['', Validators.required],
       price: [''],
       stock: [''],
       status_id: [0],
@@ -114,13 +142,6 @@ export class CreateProductComponent implements OnInit {
     });
   }
 
-  public onFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.selectedFile = file;
-    }
-  }
-
   public createProduct() {
     if (this.form.valid) {
       const formData = new FormData();
@@ -132,9 +153,14 @@ export class CreateProductComponent implements OnInit {
       formData.append('category_id', this.form.get('category_id')?.value);
       formData.append('status_id', this.form.get('status_id')?.value);
 
-      if (this.selectedFile) {
-        formData.append('image', this.selectedFile);
-      }
+      this.imageItems.forEach((img, index) => {
+        if (img.file) {
+          formData.append('images', img.file, img.file.name);
+          if (img.isPrimary) {
+            formData.append('primary', index.toString());
+          }
+        }
+      });
 
       this.form.value.attributes.forEach((attr: any, index: number) => {
         formData.append(`attributes[${index}][key]`, attr.key);

@@ -55,7 +55,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-lg-12">
+        <div class="col-12">
           <mat-label class="f-w-600 m-b-8 d-block"
             >Категорія продукту</mat-label
           >
@@ -71,50 +71,76 @@
           </mat-form-field>
         </div>
 
-        <div class="col-lg-12 img-wrapper">
-          <mat-label class="f-w-600 m-b-8 d-block">Фото товару</mat-label>
-          <input type="file" (change)="onFileSelected($event)" />
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Опис</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <textarea
+              formControlName="description"
+              matInput
+              placeholder="Опис"
+              rows="4"
+            ></textarea>
+          </mat-form-field>
         </div>
 
-        <ng-container formArrayName="attributes">
-          @for(attr of attributes.controls; track attr.value; let index =
-          $index) {
-          <div class="col-lg-6" [formGroupName]="index">
-            <mat-label class="f-w-600 m-b-8 d-block">
-              {{ attr.value.key }}
-            </mat-label>
-            <mat-form-field appearance="outline" class="w-100" color="primary">
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Зображення товару</mat-label>
+          <mat-radio-group
+            aria-label="Select primary image"
+            formControlName="primaryImageIndex"
+            (change)="setPrimaryImage($event.value)"
+          >
+            @for(img of imageItems; track index; let index = $index) {
+            <div>
               <input
-                matInput
-                placeholder="your name "
-                formControlName="value"
+                type="file"
+                (change)="onFileSelected($event, index)"
+                accept="image/*"
               />
-            </mat-form-field>
-          </div>
-          }
-        </ng-container>
-
-        <div
-          class="d-flex align-items-center attribute-add"
-          (click)="addAttribute()"
-        >
-          <mat-icon class="d-flex align-items-center">
-            <i-tabler name="category-plus" class="icon-18 d-flex"></i-tabler>
-          </mat-icon>
-          <span>Додати новий атрибут</span>
+              <mat-radio-button
+                [value]="index"
+                [checked]="img.isPrimary"
+                name="primaryImageGroup"
+                >Основне фото</mat-radio-button
+              >
+            </div>
+            }
+          </mat-radio-group>
         </div>
-      </div>
 
-      <div class="col-lg-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Опис</mat-label>
-        <mat-form-field appearance="outline" class="w-100" color="primary">
-          <textarea
-            formControlName="description"
-            matInput
-            placeholder="Опис"
-            rows="4"
-          ></textarea>
-        </mat-form-field>
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Атрибути товару</mat-label>
+          <div
+            class="d-flex align-items-center attribute-add"
+            (click)="addAttribute()"
+          >
+            <mat-icon class="d-flex align-items-center">
+              <i-tabler name="category-plus" class="icon-18 d-flex"></i-tabler>
+            </mat-icon>
+            <span>Додати новий атрибут</span>
+          </div>
+          <ng-container formArrayName="attributes">
+            @for(attr of attributes.controls; track attr.value; let index =
+            $index) {
+            <div class="col-lg-6" [formGroupName]="index">
+              <mat-label class="f-w-600 m-b-8 d-block">
+                {{ attr.value.key }}
+              </mat-label>
+              <mat-form-field
+                appearance="outline"
+                class="w-100"
+                color="primary"
+              >
+                <input
+                  matInput
+                  placeholder="your name "
+                  formControlName="value"
+                />
+              </mat-form-field>
+            </div>
+            }
+          </ng-container>
+        </div>
       </div>
 
       <div class="m-t-12 d-flex justify-content-end gap-16">
@@ -127,7 +153,7 @@
         >
           Створити
         </button>
-        <button mat-stroked-button color="warn">Відміна</button>
+        <button mat-stroked-button color="warn">Очистити</button>
       </div>
     </form>
   </mat-card-content>

@@ -11,17 +11,17 @@ export const navItems: NavItem[] = [
   },
 
   {
-    navCap: 'Управління товарами',
-  },
-  {
-    displayName: 'Створити категорію',
-    iconName: 'folder-plus',
-    route: '/manage-products/create-category',
+    navCap: 'Управління продуктом',
   },
   {
     displayName: 'Створити продукт',
     iconName: 'circle-plus',
     route: '/manage-products/create-product',
+  },
+  {
+    displayName: 'Створити категорію',
+    iconName: 'folder-plus',
+    route: '/manage-products/create-category',
   },
 
   {
