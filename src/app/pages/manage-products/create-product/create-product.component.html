@@ -6,7 +6,7 @@
     <form [formGroup]="form" class="main-form">
       <div class="row">
         <div class="col-lg-12">
-          <mat-label class="f-w-600 m-b-8 d-block">Назва товару</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block">Назва</mat-label>
           <mat-form-field appearance="outline" class="w-100" color="primary">
             <input
               type="text"
@@ -45,8 +45,8 @@
           <mat-label class="f-w-600 m-b-8 d-block">Статус продукту</mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="status_id">
-              @for (status of (statuses$ | async) || [] | transformStatuses :
-              'status_name'; track status.status_id) {
+              @for (status of (statuses$ | async) || [] ; track
+              status.status_id) {
               <mat-option [value]="status.status_id">
                 {{ status.status_name }}
               </mat-option>
@@ -98,7 +98,7 @@
             @for(attr of attributes.controls; track attr.value; let index =
             $index) {
             <div [formGroupName]="index">
-              <mat-label class="f-w-600 m-b-8 d-block">
+              <mat-label class="f-w-600 m-b-8 d-block m-t-10">
                 {{ attr.value.key }}
               </mat-label>
               <mat-form-field
@@ -119,7 +119,7 @@
 
         <div class="col-12">
           <mat-label class="f-w-600 m-b-8 d-block m-t-20"
-            >Зображення товару (Оберіть головне зображення)</mat-label
+            >Зображення товару</mat-label
           >
           <input type="file" (change)="onFileSelect($event)" multiple />
           @for(image of images.controls; track image; let index = $index) {
@@ -144,7 +144,7 @@
           </div>
           } }
 
-          <p>Зараз вибрано фото: {{ selectedImageName | async }}</p>
+          <p>Головне фото: {{ selectedImageName | async }}</p>
         </div>
       </div>
 

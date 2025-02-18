@@ -14,6 +14,11 @@ export const navItems: NavItem[] = [
     navCap: 'Управління продуктом',
   },
   {
+    displayName: 'Список продуктів',
+    iconName: 'list',
+    route: '/manage-products/product-list',
+  },
+  {
     displayName: 'Створити продукт',
     iconName: 'circle-plus',
     route: '/manage-products/create-product',

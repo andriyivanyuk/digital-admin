@@ -23,15 +23,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
 import { CategoryService } from 'src/app/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
-import { TransformStatusesPipe } from 'src/app/pipe/transformStatuses.pipe';
 import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-interface ImageItem {
-  file: File | null;
-  isPrimary: boolean;
-}
+import { ImageItem } from 'src/app/models/imageItem';
 
 @Component({
   selector: 'app-create-product',
@@ -47,7 +42,6 @@ interface ImageItem {
     MatInputModule,
     MatIconModule,
     TablerIconsModule,
-    TransformStatusesPipe,
     CommonModule,
     MatDialogModule,
     MatRadioModule,
@@ -58,24 +52,20 @@ export class CreateProductComponent implements OnInit {
   form!: FormGroup;
   imageItems: ImageItem[] = Array(5).fill({ file: null, isPrimary: false });
 
-  selectedFile: File | null = null;
-
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
 
   readonly dialog = inject(MatDialog);
   readonly snackBar = inject(MatSnackBar);
+  readonly fb = inject(FormBuilder);
+
+  readonly productStatusService = inject(ProductStatusService);
+  readonly categoryService = inject(CategoryService);
+  readonly productService = inject(ProductService);
 
   selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
     'не вибрано'
   );
-
-  constructor(
-    private fb: FormBuilder,
-    private productStatusService: ProductStatusService,
-    private categoryService: CategoryService,
-    private productService: ProductService
-  ) {}
 
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
@@ -93,7 +83,7 @@ export class CreateProductComponent implements OnInit {
   public createForm() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
-      price: [''],
+      price: [null],
       stock: [''],
       status_id: [0],
       category_id: [0],
