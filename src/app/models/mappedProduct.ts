@@ -1,4 +1,5 @@
-export interface MappedProduct {
+export interface mappedProduct {
+  product_id: number;
   title: string;
   price: string;
   stock: number;

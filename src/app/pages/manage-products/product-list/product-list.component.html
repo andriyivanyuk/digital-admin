@@ -4,9 +4,8 @@
   </mat-card-header>
   <mat-card-content>
     <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource1" class="w-100">
-        <!-- Position Column -->
-        <ng-container matColumnDef="assigned">
+      <table mat-table [dataSource]="dataSource" class="w-100">
+        <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-l-0">
             Назва
           </th>
@@ -19,7 +18,7 @@
                 class="rounded"
               />
               <div class="m-l-16">
-                <h6 class="f-s-14 f-w-600">
+                <h6 class="f-s-14 f-w-400">
                   {{ element.title }}
                 </h6>
               </div>
@@ -27,38 +26,34 @@
           </td>
         </ng-container>
 
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
+        <ng-container matColumnDef="amount">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
-            Кількість на складі, шт
+            Кількість, шт
           </th>
           <td mat-cell *matCellDef="let element">
-            <span class="text-dark f-w-600">{{ element.stock }} </span>
+            <span class="text-dark f-w-400">{{ element.stock }} </span>
           </td>
         </ng-container>
 
-        <!-- Weight Column -->
-        <ng-container matColumnDef="priority">
+        <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
             Статус
           </th>
           <td mat-cell *matCellDef="let element">
-            <span class="text-dark f-w-600">{{ element.status_name }} </span>
+            <span class="text-dark f-w-400">{{ element.status_name }} </span>
           </td>
         </ng-container>
 
-        <!-- Weight Column -->
         <ng-container matColumnDef="price">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14">
             Ціна, грн
           </th>
           <td mat-cell *matCellDef="let element">
-            <span class="text-dark f-w-600">{{ element.price }} </span>
+            <span class="text-dark f-w-400">{{ element.price }} </span>
           </td>
         </ng-container>
 
-        <!-- Symbol Column -->
-        <ng-container matColumnDef="budget">
+        <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14"></th>
           <td mat-cell *matCellDef="let element">
             <button
@@ -69,36 +64,21 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item>
-                <mat-icon>add</mat-icon>
-                <span>Add</span>
-              </button>
-              <button mat-menu-item>
+              <button mat-menu-item (click)="editProduct(element.product_id)">
                 <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+                <span>Редагувати</span>
               </button>
-              <button mat-menu-item>
+              <button mat-menu-item (click)="openDialog(element.product_id)">
                 <mat-icon>delete</mat-icon>
-                <span>Delete</span>
+                <span>Видалити</span>
               </button>
             </mat-menu>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns1"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
     </div>
   </mat-card-content>
 </mat-card>
-<!-- <div *ngFor="let product of products$ | async">
-  <h2>{{ product.title }}</h2>
-  <p>Price: {{ product.price }}</p>
-  <p>Stock: {{ product.stock }}</p>
-  <p>Status: {{ product.status_name }}</p>
-  <img
-    *ngIf="product.fullPath"
-    [src]="product.fullPath"
-    alt="Image of {{ product.title }}"
-  />
-</div> -->

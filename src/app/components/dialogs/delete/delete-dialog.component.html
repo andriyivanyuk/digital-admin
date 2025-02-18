@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>Видалити продукт</h2>
+<mat-dialog-content>Ви хотіли б видалити продукт?</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close (click)="close()">Ні</button>
+  <button mat-button mat-dialog-close cdkFocusInitial (click)="delete()">
+    Так
+  </button>
+</mat-dialog-actions>

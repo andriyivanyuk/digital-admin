@@ -1,56 +1,94 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
-import { CategoryService } from 'src/app/services/category.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MaterialModule } from 'src/app/material.module';
 import { CommonModule } from '@angular/common';
 import { ProductService } from 'src/app/services/products.service';
-import { Observable, Subscription } from 'rxjs';
-import { MappedProduct } from 'src/app/models/mappedproduct';
-
-export interface productsData {
-  id: number;
-  imagePath: string;
-  uname: string;
-  budget: number;
-  priority: string;
-}
+import { of, Subscription, switchMap } from 'rxjs';
+import { mappedProduct } from 'src/app/models/mappedProduct';
+import { Router, RouterModule } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DeleteDialogComponent } from 'src/app/components/dialogs/delete/delete-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss'],
-  imports: [CommonModule, MaterialModule],
+  imports: [CommonModule, MaterialModule, RouterModule, MatDialogModule],
   providers: [ProductService],
 })
 export class ProductListComponent implements OnInit, OnDestroy {
-  displayedColumns1: string[] = [
-    'assigned',
-    'name',
-    'priority',
+  displayedColumns: string[] = [
+    'title',
+    'amount',
+    'status',
     'price',
-    'budget',
+    'actions',
   ];
-  // dataSource1 = PRODUCT_DATA;
-  dataSource1 = new MatTableDataSource<MappedProduct>();
+
+  dataSource = new MatTableDataSource<mappedProduct>();
   private subscriptions: Subscription = new Subscription();
 
   readonly productService = inject(ProductService);
-  constructor() {}
+  readonly router = inject(Router);
+  readonly dialog = inject(MatDialog);
+  readonly snackBar = inject(MatSnackBar);
+  readonly loader = inject(NgxUiLoaderService);
 
-  products$: Observable<any[]>;
+  public editProduct(id: number) {
+    this.router.navigate(['/manage-products/edit-product', id]);
+  }
 
-  ngOnInit(): void {
+  public openDialog(id: number): void {
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      width: '250px',
+    });
+
+    const dialogSubscription = dialogRef
+      .afterClosed()
+      .pipe(
+        switchMap((result) => {
+          if (result) {
+            this.loader.start();
+            return this.productService.deleteProduct(id);
+          }
+          return of(null);
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            this.loader.stop();
+            this.getProducts();
+            this.snackBar.open(result.message, 'Закрити', {
+              duration: 3000,
+            });
+          }
+        },
+        error: (error) => {
+          this.loader.stop();
+          console.error(error);
+        },
+      });
+
+    this.subscriptions.add(dialogSubscription);
+  }
+
+  public getProducts(): void {
     const subscription = this.productService.getProducts().subscribe((data) => {
-      this.dataSource1.data = data;
+      if (data) {
+        const products = this.productService.mapProducts(data);
+        this.dataSource.data = products;
+        this.loader.stop();
+      }
     });
     this.subscriptions.add(subscription);
+  }
+
+  ngOnInit(): void {
+    this.loader.start();
+    this.getProducts();
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

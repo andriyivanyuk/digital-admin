@@ -24,10 +24,8 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import * as TablerIcons from 'angular-tabler-icons/icons';
 
-// perfect scrollbar
 import { NgScrollbarModule } from 'ngx-scrollbar';
 
-//Import all material modules
 import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthInterceptor } from './services/auth.interceptor';

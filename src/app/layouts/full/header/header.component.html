@@ -4,7 +4,7 @@
   <button
     mat-icon-button
     (click)="toggleMobileNav.emit()"
-    class="d-flex d-lg-none justify-content-center"
+    class="d-flex justify-content-center"
   >
     <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
   </button>
@@ -44,7 +44,8 @@
 
     <button mat-menu-item (click)="logout()">
       <mat-icon class="d-flex align-items-center">
-        <i-tabler name="logout" class="icon-18 d-flex"></i-tabler></mat-icon>
+        <i-tabler name="logout" class="icon-18 d-flex"></i-tabler
+      ></mat-icon>
       Logout
     </button>
   </mat-menu>

@@ -3,20 +3,13 @@ import {
   FormArray,
   FormBuilder,
   FormGroup,
-  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
+
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatRadioModule } from '@angular/material/radio';
 
 import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
-import { MatIconModule } from '@angular/material/icon';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -27,29 +20,23 @@ import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ImageItem } from 'src/app/models/imageItem';
-import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { MaterialModule } from 'src/app/material.module';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-create-product',
-  templateUrl: './create-product.component.html',
-  styleUrls: ['./create-product.component.scss'],
+  selector: 'app-edit-product',
+  templateUrl: './edit-product.component.html',
+  styleUrls: ['./edit-product.component.scss'],
   imports: [
-    MatFormFieldModule,
-    MatSelectModule,
-    FormsModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatInputModule,
-    MatIconModule,
     TablerIconsModule,
     CommonModule,
+    MaterialModule,
     MatDialogModule,
-    MatRadioModule,
   ],
   providers: [ProductStatusService, CategoryService, ProductService],
 })
-export class CreateProductComponent implements OnInit {
+export class EditProductComponent implements OnInit {
   form!: FormGroup;
   imageItems: ImageItem[] = Array(5).fill({ file: null, isPrimary: false });
 
@@ -59,7 +46,8 @@ export class CreateProductComponent implements OnInit {
   readonly dialog = inject(MatDialog);
   readonly snackBar = inject(MatSnackBar);
   readonly fb = inject(FormBuilder);
-  readonly loader = inject(NgxUiLoaderService);
+  readonly route = inject(ActivatedRoute);
+  readonly router = inject(Router);
 
   readonly productStatusService = inject(ProductStatusService);
   readonly categoryService = inject(CategoryService);
@@ -85,8 +73,8 @@ export class CreateProductComponent implements OnInit {
   public createForm() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
-      price: [null],
-      stock: [''],
+      price: [null, [Validators.required]],
+      stock: [null, [Validators.required]],
       status_id: [0],
       category_id: [0],
       description: [''],
@@ -114,15 +102,13 @@ export class CreateProductComponent implements OnInit {
     this.attributes.removeAt(lessonIndex);
   }
 
-  public prefillForm() {
-    this.productStatusService.statuses$.subscribe({
-      next: (result) => {
-        const status = result.find((status) => status.status_id);
-        if (status) {
-          this.form.controls['status_id'].reset(status.status_id);
-        }
-      },
-    });
+  public prefillForm(product: any) {
+    // this.getProductById(parseInt(userId));
+    this.form.controls['title'].reset(product.title);
+    this.form.controls['price'].reset(product.price);
+    this.form.controls['stock'].reset(product.stock);
+    this.form.controls['status_id'].reset(product.status_id);
+    this.form.controls['category_id'].reset(product.category_id);
   }
 
   public onFileSelect(event: Event) {
@@ -166,7 +152,6 @@ export class CreateProductComponent implements OnInit {
 
   public createProduct() {
     if (this.form.valid) {
-      this.loader.start();
       const formData = new FormData();
 
       formData.append('title', this.form.get('title')?.value);
@@ -197,23 +182,39 @@ export class CreateProductComponent implements OnInit {
       this.productService.addProduct(formData).subscribe({
         next: () => {
           this.form.reset();
-          this.loader.stop();
           this.snackBar.open('Продукт створено', 'Закрити', {
             duration: 3000,
           });
         },
         error: (error) => {
-          this.loader.stop();
           console.error('Помилка при додаванні продукту:', error);
         },
       });
     }
   }
 
+  public backToProducts() {
+    this.router.navigate(['/manage-products/product-list']);
+  }
+
+  public getProductById(id: number) {
+    this.productService.getProductById(id).subscribe({
+      next: (product) => {
+        console.log(product);
+        this.prefillForm(product);
+      },
+      error: (error) => {
+        console.error(error);
+      },
+    });
+  }
+
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
     this.categories$ = this.categoryService.getCategories();
     this.createForm();
-    this.prefillForm();
+
+    const userId = this.route.snapshot.paramMap.get('id')!;
+    this.getProductById(parseInt(userId));
   }
 }

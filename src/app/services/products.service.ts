@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Product } from '../models/product';
-import { MappedProduct } from '../models/mappedproduct';
+import { mappedProduct } from '../models/mappedProduct';
 import { Image } from '../models/image';
 
 @Injectable()
@@ -16,24 +16,24 @@ export class ProductService {
       map((products) =>
         products.map((product) => ({
           ...product,
-          images: product.images.map((image: Image) => ({
+          images: product.images?.map((image: Image) => ({
             ...image,
             fullPath: `http://localhost:5000/images/${image.image_path
               .replace('public\\images\\', '')
               .replace(/\\/g, '/')}`,
           })),
         }))
-      ),
-      map((products) => this.mapProducts(products))
+      )
     );
   }
 
-  private mapProducts(products: any[]): MappedProduct[] {
+  public mapProducts(products: any[]): mappedProduct[] {
     return products.map((product) => {
-      const primaryImage = product.images.find(
-        (image: any) => image.is_primary === true
+      const primaryImage = product?.images?.find(
+        (image: Image) => image.is_primary === true
       );
       return {
+        product_id: product.product_id,
         title: product.title,
         price: product.price,
         stock: product.stock,
@@ -43,8 +43,8 @@ export class ProductService {
     });
   }
 
-  public getProductById(productId: number): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${productId}`);
+  public getProductById(productId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/product/${productId}`);
   }
 
   public addProduct(product: FormData): Observable<Product> {

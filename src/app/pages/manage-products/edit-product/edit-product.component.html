@@ -1,0 +1,167 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">Редагувати продукт</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="b-t-1">
+    <form [formGroup]="form" class="main-form">
+      <div class="row">
+        <div class="col-lg-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Назва</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input
+              type="text"
+              matInput
+              placeholder="Введіть назву товару"
+              formControlName="title"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Ціна, грн</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input
+              type="number"
+              matInput
+              placeholder="Введіть ціну"
+              formControlName="price"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Кількість</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <input
+              type="number"
+              matInput
+              placeholder="Введіть кількість"
+              formControlName="stock"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Статус продукту</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="status_id">
+              @for (status of (statuses$ | async) || [] ; track
+              status.status_id) {
+              <mat-option [value]="status.status_id">
+                {{ status.status_name }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block"
+            >Категорія продукту</mat-label
+          >
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="category_id">
+              @for (category of (categories$ | async) || []; track
+              category.category_id) {
+              <mat-option [value]="category.category_id">
+                {{ category.title }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Опис</mat-label>
+          <mat-form-field appearance="outline" class="w-100" color="primary">
+            <textarea
+              formControlName="description"
+              matInput
+              placeholder="Опис"
+              rows="4"
+            ></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Атрибути товару</mat-label>
+          <div
+            class="d-flex align-items-center attribute-add"
+            (click)="addAttribute()"
+          >
+            <mat-icon class="d-flex align-items-center">
+              <i-tabler name="hexagon-plus" class="icon-18 d-flex"></i-tabler>
+            </mat-icon>
+            <span>Додати атрибут</span>
+          </div>
+          <ng-container formArrayName="attributes">
+            @for(attr of attributes.controls; track attr.value; let index =
+            $index) {
+            <div [formGroupName]="index">
+              <mat-label class="f-w-600 m-b-8 d-block m-t-10">
+                {{ attr.value.key }}
+              </mat-label>
+              <mat-form-field
+                appearance="outline"
+                class="w-100"
+                color="primary"
+              >
+                <input
+                  matInput
+                  placeholder="your name "
+                  formControlName="value"
+                />
+              </mat-form-field>
+            </div>
+            }
+          </ng-container>
+        </div>
+
+        <div class="col-12">
+          <mat-label class="f-w-600 m-b-8 d-block m-t-20"
+            >Зображення товару</mat-label
+          >
+          <input type="file" (change)="onFileSelect($event)" multiple />
+          @for(image of images.controls; track image; let index = $index) {
+          @if(images.controls.length) {
+          <div formArrayName="images">
+            <div [formGroupName]="index" class="img-upload">
+              <img
+                [src]="image.get('path')!.value"
+                [class.selected-image]="
+                  index === form.get('primaryImageIndex')!.value
+                "
+                style="width: 100px; height: auto"
+                (click)="setPrimaryImage(index)"
+              />
+              <mat-icon
+                class="d-flex align-items-center"
+                (click)="deleteImage(index)"
+              >
+                <i-tabler name="trash" class="icon-18 d-flex"></i-tabler>
+              </mat-icon>
+            </div>
+          </div>
+          } }
+
+          <p>Головне фото: {{ selectedImageName | async }}</p>
+        </div>
+      </div>
+
+      <div class="m-t-12 d-flex justify-content-end gap-16">
+        <button
+          [disabled]="form.invalid"
+          mat-flat-button
+          color="primary"
+          class="m-r-8"
+          (click)="createProduct()"
+        >
+          Зберегти
+        </button>
+        <button mat-stroked-button color="warn" (click)="backToProducts()">
+          Назад до списку
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
