@@ -38,6 +38,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class EditProductComponent implements OnInit {
   form!: FormGroup;
+  product_id: number;
+
   imageItems: ImageItem[] = Array(5).fill({ file: null, isPrimary: false });
 
   statuses$!: Observable<ProductStatus[]>;
@@ -103,12 +105,13 @@ export class EditProductComponent implements OnInit {
   }
 
   public prefillForm(product: any) {
-    // this.getProductById(parseInt(userId));
     this.form.controls['title'].reset(product.title);
     this.form.controls['price'].reset(product.price);
     this.form.controls['stock'].reset(product.stock);
     this.form.controls['status_id'].reset(product.status_id);
     this.form.controls['category_id'].reset(product.category_id);
+    this.setAttributes(product?.attributes);
+    this.setImages(product?.images);
   }
 
   public onFileSelect(event: Event) {
@@ -150,10 +153,9 @@ export class EditProductComponent implements OnInit {
     this.form.patchValue({ primaryImageIndex: index });
   }
 
-  public createProduct() {
+  public updateProduct(): void {
     if (this.form.valid) {
       const formData = new FormData();
-
       formData.append('title', this.form.get('title')?.value);
       formData.append('description', this.form.get('description')?.value);
       formData.append('price', this.form.get('price')?.value);
@@ -179,15 +181,18 @@ export class EditProductComponent implements OnInit {
         formData.append(`attributes[${index}][value]`, attr.value);
       });
 
-      this.productService.addProduct(formData).subscribe({
+      this.productService.updateProduct(this.product_id, formData).subscribe({
         next: () => {
-          this.form.reset();
-          this.snackBar.open('Продукт створено', 'Закрити', {
+          // this.router.navigate(['/products']);
+          this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
             duration: 3000,
           });
         },
         error: (error) => {
-          console.error('Помилка при додаванні продукту:', error);
+          console.error('Помилка при оновленні продукту:', error);
+          this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
+            duration: 3000,
+          });
         },
       });
     }
@@ -209,12 +214,45 @@ export class EditProductComponent implements OnInit {
     });
   }
 
+  public setAttributes(attributes: any[]): void {
+    if (attributes?.length) {
+      const attributesFormArray = this.attributes as FormArray;
+      attributes.forEach((attr) => {
+        attributesFormArray.push(
+          this.fb.group({
+            key: [attr.key, Validators.required],
+            value: [attr.value, Validators.required],
+          })
+        );
+      });
+    }
+  }
+
+  public setImages(images: any[]): void {
+    const imagesFormArray = this.images as FormArray;
+    if (images?.length) {
+      images.forEach((image) => {
+        const fullPath = `http://localhost:5000/images/${image.image_path
+          .replace('public\\images\\', '')
+          .replace(/\\/g, '/')}`;
+        imagesFormArray.push(
+          this.fb.group({
+            file: [image.file],
+            path: [fullPath],
+            isPrimary: [image.isPrimary],
+          })
+        );
+      });
+    }
+  }
+
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
     this.categories$ = this.categoryService.getCategories();
     this.createForm();
 
     const userId = this.route.snapshot.paramMap.get('id')!;
+    this.product_id = parseInt(userId);
     this.getProductById(parseInt(userId));
   }
 }
