@@ -79,6 +79,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const subscription = this.productService.getProducts().subscribe((data) => {
       if (data) {
         const products = this.productService.mapProducts(data);
+        console.log(products);
         this.dataSource.data = products;
         this.loader.stop();
       }

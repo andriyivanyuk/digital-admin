@@ -18,9 +18,7 @@ export class ProductService {
           ...product,
           images: product.images?.map((image: Image) => ({
             ...image,
-            fullPath: `http://localhost:5000/images/${image.image_path
-              .replace('public\\images\\', '')
-              .replace(/\\/g, '/')}`,
+            fullPath: `http://localhost:5000/${image.image_path}`,
           })),
         }))
       )

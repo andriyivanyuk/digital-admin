@@ -85,11 +85,11 @@ export class CreateProductComponent implements OnInit {
   public createForm() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
+      description: [''],
       price: [null],
       stock: [''],
-      status_id: [0],
-      category_id: [0],
-      description: [''],
+      category_id: [0, [Validators.required]],
+      status_id: [0, [Validators.required]],
       attributes: this.fb.array([]),
       primaryImageIndex: ['0', Validators.required],
       images: this.fb.array([]),
@@ -193,6 +193,8 @@ export class CreateProductComponent implements OnInit {
         formData.append(`attributes[${index}][key]`, attr.key);
         formData.append(`attributes[${index}][value]`, attr.value);
       });
+
+      console.log(this.form.value);
 
       this.productService.addProduct(formData).subscribe({
         next: () => {

@@ -22,6 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ImageItem } from 'src/app/models/imageItem';
 import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UpdateImage } from 'src/app/models/updateImage';
 
 @Component({
   selector: 'app-edit-product',
@@ -38,9 +39,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class EditProductComponent implements OnInit {
   form!: FormGroup;
-  product_id: number;
-
-  deletedImages: any[] = [];
+  updatedImages: UpdateImage[] = [];
 
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
@@ -55,10 +54,6 @@ export class EditProductComponent implements OnInit {
   readonly categoryService = inject(CategoryService);
   readonly productService = inject(ProductService);
 
-  selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
-    'не вибрано'
-  );
-
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
   }
@@ -67,13 +62,18 @@ export class EditProductComponent implements OnInit {
     return this.form.get('images') as FormArray;
   }
 
-  public setPrimaryImage(index: number): void {
-    this.form.patchValue({ primaryImageIndex: index });
-    this.updateSelectedImageName(index);
+  ngOnInit(): void {
+    this.statuses$ = this.productStatusService.statuses$;
+    this.categories$ = this.categoryService.getCategories();
+    this.createForm();
+
+    const productId = this.route.snapshot.paramMap.get('id')!;
+    this.getProductById(+productId);
   }
 
   public createForm() {
     this.form = this.fb.group({
+      product_id: [0],
       title: ['', [Validators.required, Validators.maxLength(255)]],
       price: [null, [Validators.required]],
       stock: [null, [Validators.required]],
@@ -83,6 +83,40 @@ export class EditProductComponent implements OnInit {
       attributes: this.fb.array([]),
       primaryImageIndex: ['0', Validators.required],
       images: this.fb.array([]),
+    });
+  }
+
+  selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'не вибрано'
+  );
+
+  public setPrimaryImage(index: number, image?: any): void {
+    // const deletedPath = image.get('path')!.value.split('\\').pop();
+    this.form.patchValue({ primaryImageIndex: index });
+    this.images.controls.forEach((control, i) => {
+      console.log(i, index);
+      control.patchValue({ isPrimary: i === index });
+    });
+
+    console.log(this.form.value.images, 'AFTER SETING MAIN');
+    // this.updatedImages = this.mapUpdatedImages(
+    //   this.form.controls['images'].value
+    // );
+
+    // console.log(this.updatedImages, 'AFTER ASSIGNING MAIN FOTO', deletedPath);
+
+    this.updateSelectedImageName(index);
+  }
+
+  private mapUpdatedImages(images: any): UpdateImage[] {
+    return images?.map((img: any) => {
+      return {
+        path: img.path
+          .replace('http://localhost:5000/', '')
+          .replace(/\\/g, '\\'),
+        isPrimary: !!img.isPrimary,
+        toDelete: false,
+      };
     });
   }
 
@@ -110,6 +144,7 @@ export class EditProductComponent implements OnInit {
     this.form.controls['stock'].reset(product.stock);
     this.form.controls['status_id'].reset(product.status_id);
     this.form.controls['category_id'].reset(product.category_id);
+    this.form.controls['product_id'].reset(product.product_id);
     this.setAttributes(product?.attributes);
     this.setImages(product?.images);
   }
@@ -132,6 +167,9 @@ export class EditProductComponent implements OnInit {
       next: (product) => {
         console.log(product);
         this.prefillForm(product);
+        this.updatedImages = this.mapUpdatedImages(
+          this.form.controls['images'].value
+        );
       },
       error: (error) => {
         console.error(error);
@@ -157,9 +195,7 @@ export class EditProductComponent implements OnInit {
     const imagesFormArray = this.images as FormArray;
     if (images?.length) {
       images.forEach((image) => {
-        const fullPath = `http://localhost:5000/images/${image.image_path
-          .replace('public\\images\\', '')
-          .replace(/\\/g, '/')}`;
+        const fullPath = `http://localhost:5000/${image.image_path}`;
         imagesFormArray.push(
           this.fb.group({
             file: [image.file],
@@ -198,35 +234,31 @@ export class EditProductComponent implements OnInit {
   }
 
   public deleteImage(index: number, image: any) {
-    if (!!image.value?.file?.name) {
-      this.deletedImages.push({
-        isDeleted: true,
-        path: image.value?.file?.name,
-      });
-    } else {
-      const path = this.extractFileName(image.value.path);
-      this.deletedImages.push({
-        isDeleted: true,
-        path: path,
-      });
-    }
+    const deletedPath = image.get('path')!.value.split('\\').pop();
+
     this.images.removeAt(index);
+
+    // this.updatedImages = this.updatedImages.map((img) => ({
+    //   ...img,
+    //   toDelete: img.path.includes(deletedPath) ? true : img.toDelete,
+    // }));
+    this.setPrimaryImage(index);
+
     if (this.images.length === 0) {
-      this.selectedImageName.next('Будь ласка, оберіть головне фото');
       this.form.patchValue({ primaryImageIndex: index });
+      this.selectedImageName.next('Будь ласка, оберіть головне фото');
     } else if (this.form.value.primaryImageIndex >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
-  }
 
-  private extractFileName(path: string) {
-    const lastSegment = path.split('/').pop();
-    return lastSegment!.replace(/^\d+-/, '');
+    console.log(this.form.value.images, 'AFTER DELETING MAIN');
   }
 
   public updateProduct(): void {
     if (this.form.valid) {
       const formData = new FormData();
+
+      formData.append('product_id', this.form.get('product_id')?.value);
       formData.append('title', this.form.get('title')?.value);
       formData.append('description', this.form.get('description')?.value);
       formData.append('price', this.form.get('price')?.value);
@@ -240,48 +272,44 @@ export class EditProductComponent implements OnInit {
 
         if (!!file) {
           formData.append('images', file, file.name);
-
-          if (
-            index.toString() ===
-            this.form.get('primaryImageIndex')!.value.toString()
-          ) {
-            formData.append('primary', index.toString());
-          }
+        }
+        if (
+          index.toString() ===
+          this.form.get('primaryImageIndex')!.value.toString()
+        ) {
+          formData.append('primary', index.toString());
         }
       });
 
-      formData.append('deletedImages', JSON.stringify(this.deletedImages));
+      const updatedArray = this.updatedImages.map((item) => ({
+        ...item,
+        path: item.path.replace(/\\/g, '\\'),
+      }));
+
+      console.log(updatedArray, 'UPDATED ARRAY RESULT');
+
+      formData.append('updatedImages', JSON.stringify(updatedArray));
 
       this.form.value.attributes.forEach((attr: any, index: number) => {
         formData.append(`attributes[${index}][key]`, attr.key);
         formData.append(`attributes[${index}][value]`, attr.value);
       });
 
-      console.log(this.deletedImages);
-
-      this.productService.updateProduct(this.product_id, formData).subscribe({
-        next: () => {
-          this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
-            duration: 3000,
-          });
-        },
-        error: (error) => {
-          console.error('Помилка при оновленні продукту:', error);
-          this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
-            duration: 3000,
-          });
-        },
-      });
+      this.productService
+        .updateProduct(this.form.value.product_id, formData)
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
+              duration: 3000,
+            });
+          },
+          error: (error) => {
+            console.error('Помилка при оновленні продукту:', error);
+            this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
+              duration: 3000,
+            });
+          },
+        });
     }
-  }
-
-  ngOnInit(): void {
-    this.statuses$ = this.productStatusService.statuses$;
-    this.categories$ = this.categoryService.getCategories();
-    this.createForm();
-
-    const userId = this.route.snapshot.paramMap.get('id')!;
-    this.product_id = parseInt(userId);
-    this.getProductById(parseInt(userId));
   }
 }
