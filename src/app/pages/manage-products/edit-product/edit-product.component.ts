@@ -23,6 +23,7 @@ import { ImageItem } from 'src/app/models/imageItem';
 import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UpdateImage } from 'src/app/models/updateImage';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-edit-product',
@@ -53,6 +54,8 @@ export class EditProductComponent implements OnInit {
   readonly productStatusService = inject(ProductStatusService);
   readonly categoryService = inject(CategoryService);
   readonly productService = inject(ProductService);
+
+  readonly loader = inject(NgxUiLoaderService);
 
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
@@ -91,21 +94,49 @@ export class EditProductComponent implements OnInit {
   );
 
   public setPrimaryImage(index: number, image?: any): void {
-    // const deletedPath = image.get('path')!.value.split('\\').pop();
     this.form.patchValue({ primaryImageIndex: index });
     this.images.controls.forEach((control, i) => {
-      console.log(i, index);
       control.patchValue({ isPrimary: i === index });
     });
 
-    console.log(this.form.value.images, 'AFTER SETING MAIN');
-    // this.updatedImages = this.mapUpdatedImages(
-    //   this.form.controls['images'].value
-    // );
-
-    // console.log(this.updatedImages, 'AFTER ASSIGNING MAIN FOTO', deletedPath);
+    this.updatedImages = this.combineArrays(
+      this.form.value.images,
+      this.updatedImages
+    );
 
     this.updateSelectedImageName(index);
+  }
+
+  public deleteImage(index: number, image: any) {
+    this.images.removeAt(index);
+
+    this.setPrimaryImage(0, this.images.at(0));
+
+    if (this.images.length === 0) {
+      this.form.patchValue({ primaryImageIndex: index });
+      this.selectedImageName.next('Будь ласка, оберіть головне фото');
+    } else if (this.form.value.primaryImageIndex >= this.images.length) {
+      this.updateSelectedImageName(this.images.length - 1);
+    }
+
+    this.updatedImages = this.combineArrays(
+      this.form.value.images,
+      this.updatedImages,
+      [index]
+    );
+  }
+
+  public combineArrays(arr1: any[], arr2: any[], deleteIndexes: number[] = []) {
+    return arr2.map((item2, index) => {
+      const fileName = item2.path.split('\\').pop();
+      const item1 = arr1.find((item1) => item1.path.includes(fileName));
+
+      return {
+        path: item2.path,
+        isPrimary: item1?.isPrimary ?? false,
+        toDelete: deleteIndexes.includes(index),
+      };
+    });
   }
 
   private mapUpdatedImages(images: any): UpdateImage[] {
@@ -163,15 +194,17 @@ export class EditProductComponent implements OnInit {
   }
 
   public getProductById(id: number) {
+    this.loader.start();
     this.productService.getProductById(id).subscribe({
       next: (product) => {
-        console.log(product);
         this.prefillForm(product);
         this.updatedImages = this.mapUpdatedImages(
           this.form.controls['images'].value
         );
+        this.loader.stop();
       },
       error: (error) => {
+        this.loader.stop();
         console.error(error);
       },
     });
@@ -233,29 +266,9 @@ export class EditProductComponent implements OnInit {
     }
   }
 
-  public deleteImage(index: number, image: any) {
-    const deletedPath = image.get('path')!.value.split('\\').pop();
-
-    this.images.removeAt(index);
-
-    // this.updatedImages = this.updatedImages.map((img) => ({
-    //   ...img,
-    //   toDelete: img.path.includes(deletedPath) ? true : img.toDelete,
-    // }));
-    this.setPrimaryImage(index);
-
-    if (this.images.length === 0) {
-      this.form.patchValue({ primaryImageIndex: index });
-      this.selectedImageName.next('Будь ласка, оберіть головне фото');
-    } else if (this.form.value.primaryImageIndex >= this.images.length) {
-      this.updateSelectedImageName(this.images.length - 1);
-    }
-
-    console.log(this.form.value.images, 'AFTER DELETING MAIN');
-  }
-
   public updateProduct(): void {
     if (this.form.valid) {
+      this.loader.start();
       const formData = new FormData();
 
       formData.append('product_id', this.form.get('product_id')?.value);
@@ -281,14 +294,9 @@ export class EditProductComponent implements OnInit {
         }
       });
 
-      const updatedArray = this.updatedImages.map((item) => ({
-        ...item,
-        path: item.path.replace(/\\/g, '\\'),
-      }));
+      console.log(this.updatedImages);
 
-      console.log(updatedArray, 'UPDATED ARRAY RESULT');
-
-      formData.append('updatedImages', JSON.stringify(updatedArray));
+      formData.append('updatedImages', JSON.stringify(this.updatedImages));
 
       this.form.value.attributes.forEach((attr: any, index: number) => {
         formData.append(`attributes[${index}][key]`, attr.key);
@@ -299,11 +307,13 @@ export class EditProductComponent implements OnInit {
         .updateProduct(this.form.value.product_id, formData)
         .subscribe({
           next: () => {
+            this.loader.stop();
             this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
               duration: 3000,
             });
           },
           error: (error) => {
+            this.loader.stop();
             console.error('Помилка при оновленні продукту:', error);
             this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
               duration: 3000,
