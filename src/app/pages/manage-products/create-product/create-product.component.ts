@@ -28,6 +28,7 @@ import { Category } from 'src/app/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ImageItem } from 'src/app/models/imageItem';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { UploadService } from 'src/app/services/upload.service';
 
 @Component({
   selector: 'app-create-product',
@@ -78,7 +79,7 @@ export class CreateProductComponent implements OnInit {
   }
 
   public setPrimaryImage(index: number): void {
-    this.form.patchValue({ primaryImageIndex: index });
+    this.form.patchValue({ primary: index });
     this.updateSelectedImageName(index);
   }
 
@@ -91,7 +92,7 @@ export class CreateProductComponent implements OnInit {
       category_id: [0, [Validators.required]],
       status_id: [0, [Validators.required]],
       attributes: this.fb.array([]),
-      primaryImageIndex: ['0', Validators.required],
+      primary: ['0', Validators.required],
       images: this.fb.array([]),
     });
   }
@@ -149,8 +150,8 @@ export class CreateProductComponent implements OnInit {
     this.images.removeAt(index);
     if (this.images.length === 0) {
       this.selectedImageName.next('Будь ласка, оберіть головне фото');
-      this.form.patchValue({ primaryImageIndex: index });
-    } else if (this.form.value.primaryImageIndex >= this.images.length) {
+      this.form.patchValue({ primary: index });
+    } else if (this.form.value.primary >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
   }
@@ -161,7 +162,7 @@ export class CreateProductComponent implements OnInit {
       ? `Фото ${parseInt(index.toString(), 10) + 1}`
       : 'Будь ласка, оберіть головне фото';
     this.selectedImageName.next(imageName);
-    this.form.patchValue({ primaryImageIndex: index });
+    this.form.patchValue({ primary: index });
   }
 
   public createProduct() {
@@ -181,10 +182,7 @@ export class CreateProductComponent implements OnInit {
         const file = imageControl.get('file')!.value;
         formData.append('images', file, file.name);
 
-        if (
-          index.toString() ===
-          this.form.get('primaryImageIndex')!.value.toString()
-        ) {
+        if (index.toString() === this.form.get('primary')!.value.toString()) {
           formData.append('primary', index.toString());
         }
       });

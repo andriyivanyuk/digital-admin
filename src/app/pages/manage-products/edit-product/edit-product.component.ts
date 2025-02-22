@@ -44,7 +44,7 @@ export class EditProductComponent implements OnInit {
 
   imageActive: boolean = true;
 
-  updatedImages: UpdateImage[] = [];
+  // updatedImages: UpdateImage[] = [];
 
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
@@ -105,17 +105,6 @@ export class EditProductComponent implements OnInit {
       control.patchValue({ isPrimary: i === index });
     });
 
-    this.updatedImages = this.combineArrays(
-      this.form.value.images,
-      this.updatedImages
-    );
-
-    const condition = index - this.updatedImages.length;
-
-    if (condition >= 0) {
-      this.indexPrimary = condition;
-    }
-
     this.updateSelectedImageName(index);
   }
 
@@ -130,12 +119,6 @@ export class EditProductComponent implements OnInit {
     } else if (this.form.value.primaryImageIndex >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
-
-    this.updatedImages = this.combineArrays(
-      this.form.value.images,
-      this.updatedImages,
-      [index]
-    );
   }
 
   public combineArrays(arr1: any[], arr2: any[], deleteIndexes: number[] = []) {
@@ -210,9 +193,6 @@ export class EditProductComponent implements OnInit {
     this.productService.getProductById(id).subscribe({
       next: (product) => {
         this.prefillForm(product);
-        this.updatedImages = this.mapUpdatedImages(
-          this.form.controls['images'].value
-        );
         this.loader.stop();
       },
       error: (error) => {
@@ -272,7 +252,6 @@ export class EditProductComponent implements OnInit {
             );
 
             this.updateSelectedImageName(this.images.length - 1);
-            console.log(this.images);
           };
           reader.readAsDataURL(file);
         }
@@ -292,7 +271,7 @@ export class EditProductComponent implements OnInit {
 
   public updateProduct(): void {
     if (this.form.valid) {
-      // this.loader.start();
+      this.loader.start();
       const formData = new FormData();
 
       formData.append('product_id', this.form.get('product_id')?.value);
@@ -312,11 +291,7 @@ export class EditProductComponent implements OnInit {
         }
       });
 
-      console.log(this.images.value);
-
-      formData.append('primary', this.indexPrimary.toString());
-
-      formData.append('updatedImages', JSON.stringify(this.updatedImages));
+      // formData.append('primary', this.indexPrimary.toString());
 
       this.form.value.attributes.forEach((attr: any, index: number) => {
         formData.append(`attributes[${index}][key]`, attr.key);
@@ -332,7 +307,6 @@ export class EditProductComponent implements OnInit {
               duration: 3000,
             });
             this.manageFormAfterEdit(result);
-            console.log(this.images);
           },
           error: (error) => {
             this.loader.stop();

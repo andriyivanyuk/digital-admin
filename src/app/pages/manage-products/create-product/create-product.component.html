@@ -128,9 +128,7 @@
             <div [formGroupName]="index" class="img-upload">
               <img
                 [src]="image.get('path')!.value"
-                [class.selected-image]="
-                  index === form.get('primaryImageIndex')!.value
-                "
+                [class.selected-image]="index === form.get('primary')!.value"
                 style="width: 100px; height: auto"
                 (click)="setPrimaryImage(index)"
               />
