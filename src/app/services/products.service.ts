@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Product } from '../models/product';
+import { Product, UpdateProductResponse } from '../models/product';
 import { mappedProduct } from '../models/mappedProduct';
 import { Image } from '../models/image';
 
@@ -41,8 +41,8 @@ export class ProductService {
     });
   }
 
-  public getProductById(productId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/product/${productId}`);
+  public getProductById(productId: number): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/product/${productId}`);
   }
 
   public addProduct(product: FormData): Observable<Product> {
@@ -52,8 +52,8 @@ export class ProductService {
   public updateProduct(
     productId: number,
     product: FormData
-  ): Observable<Product> {
-    return this.http.put<Product>(
+  ): Observable<UpdateProductResponse> {
+    return this.http.put<UpdateProductResponse>(
       `${this.apiUrl}/product/${productId}`,
       product
     );

@@ -123,7 +123,6 @@
           >
           <input type="file" (change)="onFileSelect($event)" multiple />
           @for(image of images.controls; track image; let index = $index) {
-          @if(imageActive) {
           <div formArrayName="images">
             <div [formGroupName]="index" class="img-upload">
               <img
@@ -142,7 +141,7 @@
               </mat-icon>
             </div>
           </div>
-          } }
+          }
 
           <p>Головне фото: {{ selectedImageName | async }}</p>
         </div>

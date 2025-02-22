@@ -24,6 +24,7 @@ import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UpdateImage } from 'src/app/models/updateImage';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { Product, UpdateProductResponse } from 'src/app/models/product';
 
 @Component({
   selector: 'app-edit-product',
@@ -180,7 +181,7 @@ export class EditProductComponent implements OnInit {
     this.attributes.removeAt(lessonIndex);
   }
 
-  public prefillForm(product: any) {
+  public prefillForm(product: Product) {
     this.form.controls['title'].reset(product.title);
     this.form.controls['price'].reset(product.price);
     this.form.controls['stock'].reset(product.stock);
@@ -279,6 +280,16 @@ export class EditProductComponent implements OnInit {
     }
   }
 
+  public manageFormAfterEdit(result: UpdateProductResponse) {
+    this.form.reset();
+    this.prefillForm(result.product);
+    for (let i = this.images.length - 1; i >= 0; i--) {
+      if (this.images.at(i).get('path')!.value === null) {
+        this.images.removeAt(i);
+      }
+    }
+  }
+
   public updateProduct(): void {
     if (this.form.valid) {
       // this.loader.start();
@@ -315,12 +326,13 @@ export class EditProductComponent implements OnInit {
       this.productService
         .updateProduct(this.form.value.product_id, formData)
         .subscribe({
-          next: () => {
+          next: (result) => {
             this.loader.stop();
             this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
               duration: 3000,
             });
-            this.imageActive = false;
+            this.manageFormAfterEdit(result);
+            console.log(this.images);
           },
           error: (error) => {
             this.loader.stop();
