@@ -27,6 +27,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     'actions',
   ];
 
+  isLoaded: boolean = false;
+
   dataSource = new MatTableDataSource<mappedProduct>();
   private subscriptions: Subscription = new Subscription();
 
@@ -77,11 +79,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   public getProducts(): void {
     const subscription = this.productService.getProducts().subscribe((data) => {
-      if (data) {
-        const products = this.productService.mapProducts(data);
-        console.log(products);
-        this.dataSource.data = products;
-        this.loader.stop();
+      this.loader.stop();
+
+      const products = this.productService.mapProducts(data);
+      this.dataSource.data = products;
+      if (data.length) {
+        this.isLoaded = true;
+      } else {
+        this.isLoaded = false;
       }
     });
     this.subscriptions.add(subscription);

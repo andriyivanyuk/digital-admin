@@ -40,6 +40,9 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 })
 export class EditProductComponent implements OnInit {
   form!: FormGroup;
+
+  imageActive: boolean = true;
+
   updatedImages: UpdateImage[] = [];
 
   statuses$!: Observable<ProductStatus[]>;
@@ -64,6 +67,8 @@ export class EditProductComponent implements OnInit {
   get images(): FormArray {
     return this.form.get('images') as FormArray;
   }
+
+  indexPrimary: number = 0;
 
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
@@ -103,6 +108,12 @@ export class EditProductComponent implements OnInit {
       this.form.value.images,
       this.updatedImages
     );
+
+    const condition = index - this.updatedImages.length;
+
+    if (condition >= 0) {
+      this.indexPrimary = condition;
+    }
 
     this.updateSelectedImageName(index);
   }
@@ -258,7 +269,9 @@ export class EditProductComponent implements OnInit {
                 path: [e.target.result],
               })
             );
+
             this.updateSelectedImageName(this.images.length - 1);
+            console.log(this.images);
           };
           reader.readAsDataURL(file);
         }
@@ -268,7 +281,7 @@ export class EditProductComponent implements OnInit {
 
   public updateProduct(): void {
     if (this.form.valid) {
-      this.loader.start();
+      // this.loader.start();
       const formData = new FormData();
 
       formData.append('product_id', this.form.get('product_id')?.value);
@@ -280,21 +293,17 @@ export class EditProductComponent implements OnInit {
       formData.append('status_id', this.form.get('status_id')?.value);
 
       const images = this.images.controls;
-      images.forEach((imageControl, index) => {
+      images.forEach((imageControl, _) => {
         const file = imageControl.get('file')!.value;
 
         if (!!file) {
           formData.append('images', file, file.name);
         }
-        if (
-          index.toString() ===
-          this.form.get('primaryImageIndex')!.value.toString()
-        ) {
-          formData.append('primary', index.toString());
-        }
       });
 
-      console.log(this.updatedImages);
+      console.log(this.images.value);
+
+      formData.append('primary', this.indexPrimary.toString());
 
       formData.append('updatedImages', JSON.stringify(this.updatedImages));
 
@@ -311,6 +320,7 @@ export class EditProductComponent implements OnInit {
             this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
               duration: 3000,
             });
+            this.imageActive = false;
           },
           error: (error) => {
             this.loader.stop();

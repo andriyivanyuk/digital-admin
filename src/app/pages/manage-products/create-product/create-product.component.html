@@ -122,9 +122,8 @@
             >Зображення товару</mat-label
           >
           <input type="file" (change)="onFileSelect($event)" multiple />
-          <span>{{ images.controls.length }}</span>
           @for(image of images.controls; track image; let index = $index) {
-          @if(images.controls.length) {
+          @if(imageActive) {
           <div formArrayName="images">
             <div [formGroupName]="index" class="img-upload">
               <img

@@ -51,7 +51,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 })
 export class CreateProductComponent implements OnInit {
   form!: FormGroup;
-  imageItems: ImageItem[] = Array(5).fill({ file: null, isPrimary: false });
+  imageActive: boolean = true;
 
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
@@ -194,10 +194,9 @@ export class CreateProductComponent implements OnInit {
         formData.append(`attributes[${index}][value]`, attr.value);
       });
 
-      console.log(this.form.value);
-
       this.productService.addProduct(formData).subscribe({
         next: () => {
+          this.imageActive = false;
           this.form.reset();
           this.loader.stop();
           this.snackBar.open('Продукт створено', 'Закрити', {
