@@ -17,10 +17,11 @@ export interface Product {
   status_name: string;
   category_title: string;
   attributes: any; // Тип може бути уточнено, якщо відома структура атрибутів
-  images: Image[];
+  images: ProductImage[];
 }
 
-interface Image {
+export interface ProductImage {
   image_path: string;
   is_primary: boolean;
+  image_id: number;
 }

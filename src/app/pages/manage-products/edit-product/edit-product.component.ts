@@ -12,7 +12,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
 import { CategoryService } from 'src/app/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
@@ -24,7 +24,11 @@ import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UpdateImage } from 'src/app/models/updateImage';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import { Product, UpdateProductResponse } from 'src/app/models/product';
+import {
+  Product,
+  ProductImage,
+  UpdateProductResponse,
+} from 'src/app/models/product';
 
 @Component({
   selector: 'app-edit-product',
@@ -41,10 +45,6 @@ import { Product, UpdateProductResponse } from 'src/app/models/product';
 })
 export class EditProductComponent implements OnInit {
   form!: FormGroup;
-
-  imageActive: boolean = true;
-
-  // updatedImages: UpdateImage[] = [];
 
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
@@ -69,7 +69,7 @@ export class EditProductComponent implements OnInit {
     return this.form.get('images') as FormArray;
   }
 
-  indexPrimary: number = 0;
+  imageIds: number[] = [];
 
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
@@ -90,7 +90,7 @@ export class EditProductComponent implements OnInit {
       category_id: [0],
       description: [''],
       attributes: this.fb.array([]),
-      primaryImageIndex: ['0', Validators.required],
+      primary: ['0', Validators.required],
       images: this.fb.array([]),
     });
   }
@@ -99,8 +99,29 @@ export class EditProductComponent implements OnInit {
     'не вибрано'
   );
 
+  public onFileSelect(event: Event) {
+    const element = event.currentTarget as HTMLInputElement;
+    let files = element.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        let reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.images.push(
+            this.fb.group({
+              file: [file],
+              path: [e.target.result],
+            })
+          );
+
+          this.updateSelectedImageName(this.images.length - 1);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+
   public setPrimaryImage(index: number, image?: any): void {
-    this.form.patchValue({ primaryImageIndex: index });
+    this.form.patchValue({ primary: index });
     this.images.controls.forEach((control, i) => {
       control.patchValue({ isPrimary: i === index });
     });
@@ -114,36 +135,13 @@ export class EditProductComponent implements OnInit {
     this.setPrimaryImage(0, this.images.at(0));
 
     if (this.images.length === 0) {
-      this.form.patchValue({ primaryImageIndex: index });
+      this.form.patchValue({ primary: index });
       this.selectedImageName.next('Будь ласка, оберіть головне фото');
-    } else if (this.form.value.primaryImageIndex >= this.images.length) {
+    } else if (this.form.value.primary >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
-  }
 
-  public combineArrays(arr1: any[], arr2: any[], deleteIndexes: number[] = []) {
-    return arr2.map((item2, index) => {
-      const fileName = item2.path.split('\\').pop();
-      const item1 = arr1.find((item1) => item1.path.includes(fileName));
-
-      return {
-        path: item2.path,
-        isPrimary: item1?.isPrimary ?? false,
-        toDelete: deleteIndexes.includes(index),
-      };
-    });
-  }
-
-  private mapUpdatedImages(images: any): UpdateImage[] {
-    return images?.map((img: any) => {
-      return {
-        path: img.path
-          .replace('http://localhost:5000/', '')
-          .replace(/\\/g, '\\'),
-        isPrimary: !!img.isPrimary,
-        toDelete: false,
-      };
-    });
+    this.imageIds.push(image.value.imageId);
   }
 
   public addAttribute(): void {
@@ -175,31 +173,21 @@ export class EditProductComponent implements OnInit {
     this.setImages(product?.images);
   }
 
-  private updateSelectedImageName(index: number) {
-    const image = this.images.at(index);
-    const imageName = image
-      ? `Фото ${parseInt(index.toString(), 10) + 1}`
-      : 'Будь ласка, оберіть головне фото';
-    this.selectedImageName.next(imageName);
-    this.form.patchValue({ primaryImageIndex: index });
-  }
-
-  public backToProducts() {
-    this.router.navigate(['/manage-products/product-list']);
-  }
-
-  public getProductById(id: number) {
-    this.loader.start();
-    this.productService.getProductById(id).subscribe({
-      next: (product) => {
-        this.prefillForm(product);
-        this.loader.stop();
-      },
-      error: (error) => {
-        this.loader.stop();
-        console.error(error);
-      },
-    });
+  public setImages(images: any[]): void {
+    const imagesFormArray = this.images as FormArray;
+    if (images?.length) {
+      images.forEach((image) => {
+        const fullPath = `http://localhost:5000/${image.image_path}`;
+        imagesFormArray.push(
+          this.fb.group({
+            file: [image.file],
+            path: [fullPath],
+            isPrimary: [image.isPrimary],
+            imageId: [image.image_id],
+          })
+        );
+      });
+    }
   }
 
   public setAttributes(attributes: any[]): void {
@@ -216,57 +204,40 @@ export class EditProductComponent implements OnInit {
     }
   }
 
-  public setImages(images: any[]): void {
-    const imagesFormArray = this.images as FormArray;
-    if (images?.length) {
-      images.forEach((image) => {
-        const fullPath = `http://localhost:5000/${image.image_path}`;
-        imagesFormArray.push(
-          this.fb.group({
-            file: [image.file],
-            path: [fullPath],
-            isPrimary: [image.isPrimary],
-          })
-        );
-      });
-    }
+  private updateSelectedImageName(index: number) {
+    const image = this.images.at(index);
+    const imageName = image
+      ? `Фото ${parseInt(index.toString(), 10) + 1}`
+      : 'Будь ласка, оберіть головне фото';
+    this.selectedImageName.next(imageName);
+    this.form.patchValue({ primary: index });
   }
 
-  public onFileSelect(event: Event) {
-    const element = event.currentTarget as HTMLInputElement;
-    let files = element.files;
-    if (files) {
-      Array.from(files).forEach((file) => {
-        const fileName = file.name;
-        const isAlreadyLoaded = this.images.controls.some((item) => {
-          return item.value.path.includes(fileName);
-        });
-        if (!isAlreadyLoaded) {
-          let reader = new FileReader();
-          reader.onload = (e: any) => {
-            this.images.push(
-              this.fb.group({
-                file: [file],
-                path: [e.target.result],
-              })
-            );
-
-            this.updateSelectedImageName(this.images.length - 1);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
+  public backToProducts() {
+    this.router.navigate(['/manage-products/product-list']);
   }
 
   public manageFormAfterEdit(result: UpdateProductResponse) {
-    this.form.reset();
-    this.prefillForm(result.product);
+    this.imageIds = [];
     for (let i = this.images.length - 1; i >= 0; i--) {
       if (this.images.at(i).get('path')!.value === null) {
         this.images.removeAt(i);
       }
     }
+  }
+
+  public getProductById(id: number) {
+    this.loader.start();
+    this.productService.getProductById(id).subscribe({
+      next: (product) => {
+        this.prefillForm(product);
+        this.loader.stop();
+      },
+      error: (error) => {
+        this.loader.stop();
+        console.error(error);
+      },
+    });
   }
 
   public updateProduct(): void {
@@ -281,17 +252,19 @@ export class EditProductComponent implements OnInit {
       formData.append('stock', this.form.get('stock')?.value);
       formData.append('category_id', this.form.get('category_id')?.value);
       formData.append('status_id', this.form.get('status_id')?.value);
+      formData.append('deleteImageIds', JSON.stringify(this.imageIds));
 
       const images = this.images.controls;
-      images.forEach((imageControl, _) => {
+      images.forEach((imageControl, index) => {
         const file = imageControl.get('file')!.value;
-
-        if (!!file) {
+        if (file) {
           formData.append('images', file, file.name);
         }
+        if (index.toString() === this.form.get('primary')!.value.toString()) {
+          console.log(this.form.get('primary')!.value);
+          formData.append('primary', index.toString());
+        }
       });
-
-      // formData.append('primary', this.indexPrimary.toString());
 
       this.form.value.attributes.forEach((attr: any, index: number) => {
         formData.append(`attributes[${index}][key]`, attr.key);
@@ -300,6 +273,16 @@ export class EditProductComponent implements OnInit {
 
       this.productService
         .updateProduct(this.form.value.product_id, formData)
+        .pipe(
+          catchError((error) => {
+            this.loader.stop();
+            this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
+              duration: 3000,
+            });
+            console.error('Помилка при оновленні продукту:', error);
+            return throwError(() => error);
+          })
+        )
         .subscribe({
           next: (result) => {
             this.loader.stop();
@@ -307,13 +290,6 @@ export class EditProductComponent implements OnInit {
               duration: 3000,
             });
             this.manageFormAfterEdit(result);
-          },
-          error: (error) => {
-            this.loader.stop();
-            console.error('Помилка при оновленні продукту:', error);
-            this.snackBar.open('Помилка при оновленні продукту', 'Закрити', {
-              duration: 3000,
-            });
           },
         });
     }

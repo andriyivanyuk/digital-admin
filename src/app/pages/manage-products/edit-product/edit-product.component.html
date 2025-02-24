@@ -127,16 +127,12 @@
             <div [formGroupName]="index" class="img-upload">
               <img
                 [src]="image.get('path')!.value"
-                [class.selected-image]="
-                  index === form.get('primaryImageIndex')!.value
-                "
+                [class.selected-image]="index === form.get('primary')!.value"
                 style="width: 100px; height: auto"
-                (click)="setPrimaryImage(index, image)"
-              />
+                (click)="setPrimaryImage(index, image)"/>
               <mat-icon
                 class="d-flex align-items-center"
-                (click)="deleteImage(index, image)"
-              >
+                (click)="deleteImage(index, image)">
                 <i-tabler name="trash" class="icon-18 d-flex"></i-tabler>
               </mat-icon>
             </div>

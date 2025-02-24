@@ -64,4 +64,10 @@ export class ProductService {
       `${this.apiUrl}/product/${productId}`
     );
   }
+
+  public deleteImages(imageIds: number[] | number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/productImages`, {
+      body: { imageIds },
+    });
+  }
 }

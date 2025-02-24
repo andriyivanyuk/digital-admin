@@ -180,7 +180,9 @@ export class CreateProductComponent implements OnInit {
       const images = this.images.controls;
       images.forEach((imageControl, index) => {
         const file = imageControl.get('file')!.value;
-        formData.append('images', file, file.name);
+        if (file) {
+          formData.append('images', file, file.name);
+        }
 
         if (index.toString() === this.form.get('primary')!.value.toString()) {
           formData.append('primary', index.toString());
