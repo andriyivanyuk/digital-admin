@@ -16,7 +16,7 @@ export interface Product {
   updated_at: string;
   status_name: string;
   category_title: string;
-  attributes: any; // Тип може бути уточнено, якщо відома структура атрибутів
+  attributes: any;
   images: ProductImage[];
 }
 

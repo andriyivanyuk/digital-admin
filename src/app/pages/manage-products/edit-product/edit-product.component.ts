@@ -70,6 +70,7 @@ export class EditProductComponent implements OnInit {
   }
 
   imageIds: number[] = [];
+  selectedImageId: number = 0;
 
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
@@ -110,6 +111,7 @@ export class EditProductComponent implements OnInit {
             this.fb.group({
               file: [file],
               path: [e.target.result],
+              imageId: null,
             })
           );
 
@@ -126,13 +128,15 @@ export class EditProductComponent implements OnInit {
       control.patchValue({ isPrimary: i === index });
     });
 
+    this.selectedImageId = image.value.imageId;
+
     this.updateSelectedImageName(index);
   }
 
   public deleteImage(index: number, image: any) {
     this.images.removeAt(index);
 
-    this.setPrimaryImage(0, this.images.at(0));
+    // this.setPrimaryImage(0, this.images.at(0));
 
     if (this.images.length === 0) {
       this.form.patchValue({ primary: index });
@@ -141,7 +145,9 @@ export class EditProductComponent implements OnInit {
       this.updateSelectedImageName(this.images.length - 1);
     }
 
-    this.imageIds.push(image.value.imageId);
+    if (!!image.value.imageId) {
+      this.imageIds.push(image.value.imageId);
+    }
   }
 
   public addAttribute(): void {
@@ -217,12 +223,27 @@ export class EditProductComponent implements OnInit {
     this.router.navigate(['/manage-products/product-list']);
   }
 
-  public manageFormAfterEdit(result: UpdateProductResponse) {
-    this.imageIds = [];
-    for (let i = this.images.length - 1; i >= 0; i--) {
-      if (this.images.at(i).get('path')!.value === null) {
-        this.images.removeAt(i);
-      }
+  public manageFormAfterEdit(result: UpdateProductResponse): void {
+    this.images.clear();
+
+    const newImages = result.product.images;
+    if (newImages && newImages.length) {
+      newImages.forEach((image) => {
+        const fullPath = `http://localhost:5000/${image.image_path}`;
+        const imageGroup = this.fb.group({
+          file: [null],
+          path: [fullPath],
+          isPrimary: [image.is_primary],
+          imageId: [image.image_id],
+        });
+        this.images.push(imageGroup);
+      });
+    }
+
+    if (this.images.length > 0) {
+      this.updateSelectedImageName(0);
+    } else {
+      this.selectedImageName.next('Будь ласка, оберіть головне фото');
     }
   }
 
@@ -254,15 +275,13 @@ export class EditProductComponent implements OnInit {
       formData.append('status_id', this.form.get('status_id')?.value);
       formData.append('deleteImageIds', JSON.stringify(this.imageIds));
 
+      formData.append('selectedImageId', JSON.stringify(this.selectedImageId));
+
       const images = this.images.controls;
       images.forEach((imageControl, index) => {
         const file = imageControl.get('file')!.value;
         if (file) {
           formData.append('images', file, file.name);
-        }
-        if (index.toString() === this.form.get('primary')!.value.toString()) {
-          console.log(this.form.get('primary')!.value);
-          formData.append('primary', index.toString());
         }
       });
 
@@ -289,6 +308,11 @@ export class EditProductComponent implements OnInit {
             this.snackBar.open('Продукт оновлено успішно', 'Закрити', {
               duration: 3000,
             });
+            this.imageIds = [];
+            this.selectedImageId = 0;
+
+            console.log(this.form);
+
             this.manageFormAfterEdit(result);
           },
         });
