@@ -129,10 +129,13 @@
                 [src]="image.get('path')!.value"
                 [class.selected-image]="index === form.get('primary')!.value"
                 style="width: 100px; height: auto"
-                (click)="setPrimaryImage(index, image)"/>
+                (click)="setPrimaryImage(index, image)"
+              />
               <mat-icon
                 class="d-flex align-items-center"
-                (click)="deleteImage(index, image)">
+                (click)="deleteImage(index, image)"
+                matTooltip="Видалити зображення"
+              >
                 <i-tabler name="trash" class="icon-18 d-flex"></i-tabler>
               </mat-icon>
             </div>
@@ -140,6 +143,12 @@
           }
 
           <p>Головне фото: {{ selectedImageName | async }}</p>
+          <div
+            *ngIf="form.get('images')!.errors?.['minImageCount']"
+            class="empty-img-error"
+          >
+            Будь ласка, завантажте хоча б одне зображення.
+          </div>
         </div>
       </div>
 

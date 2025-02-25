@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
@@ -15,23 +15,31 @@ import { TokenStorageService } from 'src/app/services/token-storage.service';
   providers: [AuthService],
   templateUrl: './side-login.component.html',
 })
-export class AppSideLoginComponent {
+export class AppSideLoginComponent implements OnInit {
+  form!: FormGroup;
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private tokenStorage: TokenStorageService
   ) {}
 
-  form = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [
-      Validators.required,
-      Validators.minLength(5),
-    ]),
-  });
+  ngOnInit(): void {
+    this.createForm();
+  }
 
   get f() {
     return this.form.controls;
+  }
+
+  public createForm() {
+    this.form = new FormGroup({
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', [
+        Validators.required,
+        Validators.minLength(5),
+      ]),
+    });
   }
 
   public signIn() {
@@ -48,6 +56,7 @@ export class AppSideLoginComponent {
       next: (result) => {
         this.router.navigate(['/dashboard']);
         this.tokenStorage.saveToken(result.token);
+        this.tokenStorage.setUserSession(result);
       },
       error: (error) => {
         console.log(error);

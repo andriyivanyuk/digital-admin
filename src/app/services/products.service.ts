@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Product, UpdateProductResponse } from '../models/product';
 import { mappedProduct } from '../models/mappedProduct';
-import { Image } from '../models/image';
+import { ProductImage } from '../models/productImage';
 
 @Injectable()
 export class ProductService {
@@ -16,7 +16,7 @@ export class ProductService {
       map((products) =>
         products.map((product) => ({
           ...product,
-          images: product.images?.map((image: Image) => ({
+          images: product.images?.map((image: ProductImage) => ({
             ...image,
             fullPath: `http://localhost:5000/${image.image_path}`,
           })),
@@ -28,7 +28,7 @@ export class ProductService {
   public mapProducts(products: any[]): mappedProduct[] {
     return products.map((product) => {
       const primaryImage = product?.images?.find(
-        (image: Image) => image.is_primary === true
+        (image: ProductImage) => image.is_primary === true
       );
       return {
         product_id: product.product_id,

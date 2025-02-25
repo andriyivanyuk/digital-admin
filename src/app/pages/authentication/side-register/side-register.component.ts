@@ -17,7 +17,10 @@ export class AppSideRegisterComponent {
   constructor(private settings: CoreService, private router: Router) {}
 
   form = new FormGroup({
-    uname: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    usermame: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
     email: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required]),
   });
@@ -27,7 +30,6 @@ export class AppSideRegisterComponent {
   }
 
   submit() {
-    // console.log(this.form.value);
     this.router.navigate(['/']);
   }
 }

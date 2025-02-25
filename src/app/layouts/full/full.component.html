@@ -4,9 +4,6 @@
   autoFocus
   dir="ltr"
 >
-  <!-- ============================================================== -->
-  <!-- Vertical Sidebar -->
-  <!-- ============================================================== -->
   <mat-sidenav
     #leftsidenav
     [mode]="isOver ? 'over' : 'side'"
@@ -31,9 +28,6 @@
     </div>
   </mat-sidenav>
 
-  <!-- ============================================================== -->
-  <!-- Main Content -->
-  <!-- ============================================================== -->
   <mat-sidenav-content class="contentWrapper" #content>
     <app-header
       [showToggle]="!isOver"
@@ -45,7 +39,7 @@
     </main>
 
     <div class="p-16 p-b-30 text-center">
-      Developed by
+      Розроблено
       <a class="text-decoration-none" target="_blank">Digital Engineers</a>
     </div>
   </mat-sidenav-content>

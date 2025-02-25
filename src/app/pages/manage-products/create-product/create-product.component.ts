@@ -7,16 +7,10 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatRadioModule } from '@angular/material/radio';
+
+import { MatDialog } from '@angular/material/dialog';
 
 import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
-import { MatIconModule } from '@angular/material/icon';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -26,27 +20,20 @@ import { ProductService } from 'src/app/services/products.service';
 import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ImageItem } from 'src/app/models/imageItem';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import { UploadService } from 'src/app/services/upload.service';
+import { MaterialModule } from 'src/app/material.module';
+import { minImageCountValidator } from 'src/app/validators/min-image-count.validator';
 
 @Component({
   selector: 'app-create-product',
   templateUrl: './create-product.component.html',
   styleUrls: ['./create-product.component.scss'],
   imports: [
-    MatFormFieldModule,
-    MatSelectModule,
     FormsModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatInputModule,
-    MatIconModule,
     TablerIconsModule,
     CommonModule,
-    MatDialogModule,
-    MatRadioModule,
+    MaterialModule,
   ],
   providers: [ProductStatusService, CategoryService, ProductService],
 })
@@ -87,13 +74,13 @@ export class CreateProductComponent implements OnInit {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       description: [''],
-      price: [null],
-      stock: [''],
-      category_id: [0, [Validators.required]],
-      status_id: [0, [Validators.required]],
+      price: [null, [Validators.required]],
+      stock: [null, [Validators.required]],
+      category_id: [null, [Validators.required]],
+      status_id: [null, [Validators.required]],
       attributes: this.fb.array([]),
-      primary: ['0', Validators.required],
-      images: this.fb.array([]),
+      primary: [null],
+      images: this.fb.array([], minImageCountValidator(1)),
     });
   }
 
@@ -154,6 +141,8 @@ export class CreateProductComponent implements OnInit {
     } else if (this.form.value.primary >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
+
+    console.log(this.images);
   }
 
   private updateSelectedImageName(index: number) {

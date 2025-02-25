@@ -21,7 +21,10 @@
   align-items: center;
   margin-top: 20px;
   justify-content: space-between;
-  max-width: 155px;
+}
+
+.empty-img-error {
+  color: #d32f2f;
 }
 
 mat-icon {

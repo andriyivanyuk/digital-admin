@@ -1,0 +1,16 @@
+.user-block {
+  font-size: 14px;
+  display: flex;
+  column-gap: 10px;
+
+  .user-title {
+    font-weight: 600;
+  }
+}
+
+.common-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}

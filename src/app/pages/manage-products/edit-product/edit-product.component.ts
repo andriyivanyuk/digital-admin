@@ -19,16 +19,11 @@ import { ProductService } from 'src/app/services/products.service';
 import { CommonModule } from '@angular/common';
 import { Category } from 'src/app/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ImageItem } from 'src/app/models/imageItem';
 import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UpdateImage } from 'src/app/models/updateImage';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import {
-  Product,
-  ProductImage,
-  UpdateProductResponse,
-} from 'src/app/models/product';
+import { Product, UpdateProductResponse } from 'src/app/models/product';
+import { minImageCountValidator } from 'src/app/validators/min-image-count.validator';
 
 @Component({
   selector: 'app-edit-product',
@@ -87,12 +82,12 @@ export class EditProductComponent implements OnInit {
       title: ['', [Validators.required, Validators.maxLength(255)]],
       price: [null, [Validators.required]],
       stock: [null, [Validators.required]],
-      status_id: [0],
-      category_id: [0],
+      status_id: [null, [Validators.required]],
+      category_id: [null, [Validators.required]],
       description: [''],
       attributes: this.fb.array([]),
-      primary: ['0', Validators.required],
-      images: this.fb.array([]),
+      primary: [null],
+      images: this.fb.array([], minImageCountValidator(1)),
     });
   }
 

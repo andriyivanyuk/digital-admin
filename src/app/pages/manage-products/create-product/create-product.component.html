@@ -135,6 +135,7 @@
               <mat-icon
                 class="d-flex align-items-center"
                 (click)="deleteImage(index)"
+                matTooltip="Видалити зображення"
               >
                 <i-tabler name="trash" class="icon-18 d-flex"></i-tabler>
               </mat-icon>
@@ -143,12 +144,18 @@
           } }
 
           <p>Головне фото: {{ selectedImageName | async }}</p>
+          <div
+            *ngIf="form.get('images')!.errors?.['minImageCount']"
+            class="empty-img-error"
+          >
+            Будь ласка, завантажте хоча б одне зображення.
+          </div>
         </div>
       </div>
 
       <div class="m-t-12 d-flex justify-content-end gap-16">
         <button
-          [disabled]="form.invalid"
+          [disabled]="!form.valid"
           mat-flat-button
           color="primary"
           class="m-r-8"
