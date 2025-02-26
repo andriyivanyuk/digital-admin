@@ -141,8 +141,6 @@ export class CreateProductComponent implements OnInit {
     } else if (this.form.value.primary >= this.images.length) {
       this.updateSelectedImageName(this.images.length - 1);
     }
-
-    console.log(this.images);
   }
 
   private updateSelectedImageName(index: number) {
