@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Product, UpdateProductResponse } from '../models/product';
 import { mappedProduct } from '../models/mappedProduct';
 import { ProductImage } from '../models/productImage';
+import { ProductResponse } from '../models/productResponse';
 
 @Injectable()
 export class ProductService {
@@ -11,18 +12,53 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  public getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl + '/products').pipe(
-      map((products) =>
-        products.map((product) => ({
-          ...product,
-          images: product.images?.map((image: ProductImage) => ({
-            ...image,
-            fullPath: `http://localhost:5000/${image.image_path}`,
+  // public getProducts(page: number, limit: number): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set('page', page.toString())
+  //     .set('limit', limit.toString());
+
+  //   return this.http.get<any>(this.apiUrl + '/products', { params }).pipe(
+  //     map((result) =>
+  //       result.products.map((product: any) => ({
+  //         ...product,
+  //         images: product.images?.map((image: ProductImage) => ({
+  //           ...image,
+  //           fullPath: `http://localhost:5500/${image.image_path}`,
+  //         })),
+  //       }))
+  //     )
+  //   );
+  // }
+
+  public getProducts(
+    page: number,
+    limit: number,
+    search: string = ''
+  ): Observable<ProductResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    return this.http
+      .get<ProductResponse>(`${this.apiUrl}/products`, { params })
+      .pipe(
+        map((result) => ({
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          products: result.products.map((product) => ({
+            ...product,
+            images: product.images?.map((image: ProductImage) => ({
+              ...image,
+              fullPath: `http://localhost:5500/${image.image_path}`,
+            })),
           })),
         }))
-      )
-    );
+      );
   }
 
   public mapProducts(products: any[]): mappedProduct[] {

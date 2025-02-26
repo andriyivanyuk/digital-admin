@@ -178,7 +178,7 @@ export class EditProductComponent implements OnInit {
     const imagesFormArray = this.images as FormArray;
     if (images?.length) {
       images.forEach((image) => {
-        const fullPath = `http://localhost:5000/${image.image_path}`;
+        const fullPath = `http://localhost:5500/${image.image_path}`;
         imagesFormArray.push(
           this.fb.group({
             file: [image.file],

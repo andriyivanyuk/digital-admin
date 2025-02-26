@@ -3,22 +3,46 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MaterialModule } from 'src/app/material.module';
 import { CommonModule } from '@angular/common';
 import { ProductService } from 'src/app/services/products.service';
-import { of, Subscription, switchMap } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  Subscription,
+  switchMap,
+} from 'rxjs';
 import { mappedProduct } from 'src/app/models/mappedProduct';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DeleteDialogComponent } from 'src/app/components/dialogs/delete/delete-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { PageEvent } from '@angular/material/paginator';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss'],
-  imports: [CommonModule, MaterialModule, RouterModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MaterialModule,
+    RouterModule,
+    MatDialogModule,
+  ],
   providers: [ProductService],
 })
 export class ProductListComponent implements OnInit, OnDestroy {
+  form!: FormGroup;
+
   displayedColumns: string[] = [
     'title',
     'amount',
@@ -26,6 +50,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
     'price',
     'actions',
   ];
+
+  //For pagination
+  totalProducts = 0;
+  page = 1;
+  limit = 20;
 
   isLoaded: boolean = false;
 
@@ -37,6 +66,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   readonly dialog = inject(MatDialog);
   readonly snackBar = inject(MatSnackBar);
   readonly loader = inject(NgxUiLoaderService);
+  readonly fb = inject(FormBuilder);
+
+  public createForm() {
+    this.form = this.fb.group({
+      title: ['', [Validators.required]],
+    });
+  }
 
   public editProduct(id: number) {
     this.router.navigate(['/manage-products/edit-product', id]);
@@ -77,24 +113,44 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(dialogSubscription);
   }
 
-  public getProducts(): void {
-    const subscription = this.productService.getProducts().subscribe((data) => {
-      this.loader.stop();
+  public getProducts(value: string = ''): void {
+    const subscription = this.productService
+      .getProducts(this.page, this.limit, value)
+      .subscribe((result) => {
+        console.log(result);
+        this.loader.stop();
 
-      const products = this.productService.mapProducts(data);
-      this.dataSource.data = products;
-      if (data.length) {
-        this.isLoaded = true;
-      } else {
-        this.isLoaded = false;
-      }
-    });
+        const products = this.productService.mapProducts(result.products);
+        this.dataSource.data = products;
+        this.totalProducts = products.length;
+        if (result.products.length) {
+          this.isLoaded = true;
+        } else {
+          this.isLoaded = false;
+        }
+      });
     this.subscriptions.add(subscription);
   }
 
+  public onPageEvent(event: PageEvent) {
+    this.page = event.pageIndex + 1;
+    this.limit = event.pageSize;
+    this.getProducts();
+  }
+
   ngOnInit(): void {
+    this.createForm();
     this.loader.start();
     this.getProducts();
+
+    this.form.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe((value) => {
+        this.page = 1;
+        if (value) {
+          this.getProducts(value.title);
+        }
+      });
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

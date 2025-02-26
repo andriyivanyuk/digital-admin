@@ -3,8 +3,21 @@
     <mat-card-title class="m-b-0">Список продуктів</mat-card-title>
   </mat-card-header>
   <mat-card-content>
+    <form [formGroup]="form">
+      <mat-label class="f-w-600 m-b-8 d-block">Пошук по назві товару</mat-label>
+      <mat-form-field appearance="outline" class="w-100" color="primary">
+        <input
+          type="text"
+          matInput
+          placeholder="Введіть назву товару"
+          formControlName="title"
+        />
+      </mat-form-field>
+    </form>
+
     <div class="table-responsive">
       @if(isLoaded) {
+
       <table mat-table [dataSource]="dataSource" class="w-100">
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-l-0">
@@ -80,8 +93,16 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
+      <mat-paginator
+        [length]="totalProducts"
+        [pageSize]="limit"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (page)="onPageEvent($event)"
+        aria-label="Select page"
+      >
+      </mat-paginator>
       } @else {
-      <div class="empty">Немає створених продуктів</div>
+      <div class="empty">Продуктів не знайдено</div>
       }
     </div>
   </mat-card-content>
