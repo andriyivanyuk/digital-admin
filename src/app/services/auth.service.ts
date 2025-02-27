@@ -8,7 +8,7 @@ import { LoginResponse } from '../models/loginResponse';
 
 @Injectable()
 export class AuthService {
-  private apiUrl = 'http://localhost:5500/api/auth';
+  private apiUrl = 'http://localhost:5500/api/auth/admin';
 
   constructor(private http: HttpClient, private router: Router) {}
 

@@ -1,4 +1,4 @@
-export interface mappedProduct {
+export interface ViewProduct {
   product_id: number;
   title: string;
   price: string;

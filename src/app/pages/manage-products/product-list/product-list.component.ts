@@ -4,13 +4,13 @@ import { MaterialModule } from 'src/app/material.module';
 import { CommonModule } from '@angular/common';
 import { ProductService } from 'src/app/services/products.service';
 import {
+  catchError,
   debounceTime,
   distinctUntilChanged,
   of,
   Subscription,
   switchMap,
 } from 'rxjs';
-import { mappedProduct } from 'src/app/models/mappedProduct';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DeleteDialogComponent } from 'src/app/components/dialogs/delete/delete-dialog.component';
@@ -19,12 +19,12 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { PageEvent } from '@angular/material/paginator';
 import {
   FormBuilder,
-  FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ViewProduct } from 'src/app/models/ViewProduct';
 
 @Component({
   selector: 'app-product-list',
@@ -58,7 +58,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   isLoaded: boolean = false;
 
-  dataSource = new MatTableDataSource<mappedProduct>();
+  dataSource = new MatTableDataSource<ViewProduct>();
   private subscriptions: Subscription = new Subscription();
 
   readonly productService = inject(ProductService);
@@ -116,8 +116,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   public getProducts(value: string = ''): void {
     const subscription = this.productService
       .getProducts(this.page, this.limit, value)
+      .pipe(
+        catchError((error) => {
+          this.loader.stop();
+          throw 'error in getting products: ' + error;
+        })
+      )
       .subscribe((result) => {
-        console.log(result);
         this.loader.stop();
 
         const products = this.productService.mapProducts(result.products);

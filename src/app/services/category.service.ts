@@ -6,7 +6,7 @@ import { Category } from '../models/category';
 
 @Injectable()
 export class CategoryService {
-  private apiUrl = 'http://localhost:5500/api';
+  private apiUrl = 'http://localhost:5500/api/admin';
 
   private categories = new BehaviorSubject<any[]>([]);
   public categories$ = this.categories.asObservable();

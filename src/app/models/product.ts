@@ -1,7 +1,4 @@
-export interface UpdateProductResponse {
-  message: string;
-  product: Product;
-}
+import { ProductAttribute, ProductImage } from './productResponse';
 
 export interface Product {
   product_id: number;
@@ -15,13 +12,6 @@ export interface Product {
   created_at: string;
   updated_at: string;
   status_name: string;
-  category_title: string;
-  attributes: any;
+  attributes: ProductAttribute[];
   images: ProductImage[];
-}
-
-export interface ProductImage {
-  image_path: string;
-  is_primary: boolean;
-  image_id: number;
 }

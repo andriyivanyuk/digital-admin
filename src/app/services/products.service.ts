@@ -1,34 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Product, UpdateProductResponse } from '../models/product';
-import { mappedProduct } from '../models/mappedProduct';
+import { UpdateProductResponse } from '../models/UpdatedProductResponse';
 import { ProductImage } from '../models/productImage';
 import { ProductResponse } from '../models/productResponse';
+import { ViewProduct } from '../models/ViewProduct';
+import { Product } from '../models/product';
 
 @Injectable()
 export class ProductService {
-  private apiUrl = 'http://localhost:5500/api';
+  private apiUrl = 'http://localhost:5500/api/admin';
 
   constructor(private http: HttpClient) {}
-
-  // public getProducts(page: number, limit: number): Observable<any> {
-  //   let params = new HttpParams()
-  //     .set('page', page.toString())
-  //     .set('limit', limit.toString());
-
-  //   return this.http.get<any>(this.apiUrl + '/products', { params }).pipe(
-  //     map((result) =>
-  //       result.products.map((product: any) => ({
-  //         ...product,
-  //         images: product.images?.map((image: ProductImage) => ({
-  //           ...image,
-  //           fullPath: `http://localhost:5500/${image.image_path}`,
-  //         })),
-  //       }))
-  //     )
-  //   );
-  // }
 
   public getProducts(
     page: number,
@@ -61,7 +44,7 @@ export class ProductService {
       );
   }
 
-  public mapProducts(products: any[]): mappedProduct[] {
+  public mapProducts(products: any[]): ViewProduct[] {
     return products.map((product) => {
       const primaryImage = product?.images?.find(
         (image: ProductImage) => image.is_primary === true

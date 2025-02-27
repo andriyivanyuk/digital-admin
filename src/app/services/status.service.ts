@@ -14,7 +14,7 @@ import { ProductStatus } from '../models/productStatus';
 export class ProductStatusService {
   private destroy$ = new Subject<void>();
 
-  private apiUrl = 'http://localhost:5500/api';
+  private apiUrl = 'http://localhost:5500/api/admin';
   private statuses = new BehaviorSubject<ProductStatus[]>([]);
   public statuses$ = this.statuses.asObservable();
 

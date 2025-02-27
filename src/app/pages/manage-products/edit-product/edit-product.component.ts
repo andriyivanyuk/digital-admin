@@ -22,8 +22,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import { Product, UpdateProductResponse } from 'src/app/models/product';
+import { UpdateProductResponse } from 'src/app/models/UpdatedProductResponse';
 import { minImageCountValidator } from 'src/app/validators/min-image-count.validator';
+import { Product } from 'src/app/models/product';
+import { ProductAttribute } from 'src/app/models/productResponse';
 
 @Component({
   selector: 'app-edit-product',
@@ -170,8 +172,12 @@ export class EditProductComponent implements OnInit {
     this.form.controls['status_id'].reset(product.status_id);
     this.form.controls['category_id'].reset(product.category_id);
     this.form.controls['product_id'].reset(product.product_id);
-    this.setAttributes(product?.attributes);
-    this.setImages(product?.images);
+    if (!!product.attributes.length) {
+      this.setAttributes(product.attributes);
+    }
+    if (!!product.images.length) {
+      this.setImages(product?.images);
+    }
   }
 
   public setImages(images: any[]): void {
@@ -191,7 +197,7 @@ export class EditProductComponent implements OnInit {
     }
   }
 
-  public setAttributes(attributes: any[]): void {
+  public setAttributes(attributes: ProductAttribute[]): void {
     if (attributes?.length) {
       const attributesFormArray = this.attributes as FormArray;
       attributes.forEach((attr) => {
