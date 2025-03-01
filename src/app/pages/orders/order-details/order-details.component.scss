@@ -1,0 +1,30 @@
+.img-wrapper {
+  margin-bottom: 20px;
+}
+
+.main-form {
+  max-width: 800px;
+}
+
+.ordered-items {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  justify-content: space-between;
+}
+
+.empty-img-error {
+  color: #d32f2f;
+}
+
+mat-icon {
+  cursor: pointer;
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 16px;
+  margin-top: 25px;
+}

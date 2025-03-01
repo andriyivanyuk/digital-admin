@@ -25,6 +25,13 @@ export const routes: Routes = [
             (m) => m.manageProductsRoutes
           ),
       },
+      {
+        path: 'orders',
+        loadChildren: () =>
+          import('./pages/orders/manage-orders.routes').then(
+            (m) => m.manageOrdersRoutes
+          ),
+      },
     ],
     canActivate: [AuthGuard],
   },

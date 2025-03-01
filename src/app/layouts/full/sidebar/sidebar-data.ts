@@ -30,6 +30,15 @@ export const navItems: NavItem[] = [
   },
 
   {
+    navCap: 'Замовлення',
+  },
+  {
+    displayName: 'Список замовлень',
+    iconName: 'list',
+    route: '/orders/order-list',
+  },
+
+  {
     navCap: 'Елементи',
   },
 
