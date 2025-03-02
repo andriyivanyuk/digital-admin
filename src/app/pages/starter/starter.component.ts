@@ -8,14 +8,5 @@ import { WebSocketService } from 'src/app/services/websocket.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class StarterComponent implements OnInit {
-  readonly webSocketService = inject(WebSocketService);
-
-  ngOnInit(): void {
-    // this.webSocketService.socket.on('newOrder', (order) => {
-    //   console.log('🔔 ОТРИМАНО ЗАМОВЛЕННЯ (без Observable):', order);
-    // });
-    this.webSocketService.onNewOrder().subscribe((order) => {
-      console.log('🔔 ОТРИМАНО WS-ПОДІЮ через Subject:', order);
-    });
-  }
+  ngOnInit(): void {}
 }

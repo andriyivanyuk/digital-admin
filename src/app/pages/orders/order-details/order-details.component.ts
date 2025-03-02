@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -18,6 +19,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { OrderService } from '../services/order.service';
 import { Order, OrderItem } from '../model/order';
+import { Observable } from 'rxjs';
+import { UpdateOrderStatus } from '../model/updateOrderRequest';
 
 @Component({
   selector: 'app-order-details',
@@ -33,7 +36,11 @@ import { Order, OrderItem } from '../model/order';
   providers: [OrderService],
 })
 export class OrderDetailsComponent implements OnInit {
+  statusControl = new FormControl(null, [Validators.required]);
   form!: FormGroup;
+  orderId: number;
+
+  orderStatuses$!: Observable<any[]>;
 
   readonly dialog = inject(MatDialog);
   readonly snackBar = inject(MatSnackBar);
@@ -49,8 +56,6 @@ export class OrderDetailsComponent implements OnInit {
     return this.form.get('orderedItems') as FormArray;
   }
 
-  selectedImageId: number = 0;
-
   ngOnInit(): void {
     this.createForm();
 
@@ -58,6 +63,7 @@ export class OrderDetailsComponent implements OnInit {
     if (orderId) {
       this.getOrderById(+orderId);
     }
+    this.orderStatuses$ = this.orderService.orderStatuses$;
   }
 
   public createForm() {
@@ -67,8 +73,6 @@ export class OrderDetailsComponent implements OnInit {
       phone: [''],
       totalCost: [''],
       orderedItems: this.fb.array([]),
-      status_id: [null, [Validators.required]],
-      category_id: [null, [Validators.required]],
     });
   }
 
@@ -77,8 +81,6 @@ export class OrderDetailsComponent implements OnInit {
     this.form.controls['email'].reset(order.email);
     this.form.controls['phone'].reset(order.phone);
     this.form.controls['totalCost'].reset(order.total_cost);
-    // this.form.controls['status_id'].reset(product.status_id);
-    // this.form.controls['category_id'].reset(product.category_id);
 
     if (!!order.items.length) {
       this.setItems(order?.items);
@@ -109,7 +111,7 @@ export class OrderDetailsComponent implements OnInit {
     this.loader.start();
     this.orderService.getOrderDetails(id).subscribe({
       next: (order) => {
-        console.log(order);
+        this.orderId = order.order_id;
         this.prefillForm(order);
         this.loader.stop();
         this.form.disable();
@@ -122,7 +124,21 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   public updateProduct(): void {
-    if (this.form.valid) {
+    if (this.orderId && this.statusControl.value) {
+      const request: UpdateOrderStatus = {
+        orderId: this.orderId,
+        statusId: this.statusControl.value,
+      };
+      console.log(this.statusControl.value, request);
+      this.orderService.updateOrderStatus(request).subscribe({
+        next: (result) => {
+          console.log(result);
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+      console.log(request);
     }
   }
 }

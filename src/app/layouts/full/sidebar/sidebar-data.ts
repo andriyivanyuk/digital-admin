@@ -11,6 +11,15 @@ export const navItems: NavItem[] = [
   },
 
   {
+    navCap: 'Замовлення',
+  },
+  {
+    displayName: 'Список замовлень',
+    iconName: 'list',
+    route: '/orders/order-list',
+  },
+
+  {
     navCap: 'Управління продуктом',
   },
   {
@@ -27,15 +36,6 @@ export const navItems: NavItem[] = [
     displayName: 'Створити категорію',
     iconName: 'folder-plus',
     route: '/manage-products/create-category',
-  },
-
-  {
-    navCap: 'Замовлення',
-  },
-  {
-    displayName: 'Список замовлень',
-    iconName: 'list',
-    route: '/orders/order-list',
   },
 
   {

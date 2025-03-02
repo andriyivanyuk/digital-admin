@@ -172,10 +172,10 @@ export class EditProductComponent implements OnInit {
     this.form.controls['status_id'].reset(product.status_id);
     this.form.controls['category_id'].reset(product.category_id);
     this.form.controls['product_id'].reset(product.product_id);
-    if (!!product.attributes.length) {
+    if (!!product.attributes?.length) {
       this.setAttributes(product.attributes);
     }
-    if (!!product.images.length) {
+    if (!!product.images?.length) {
       this.setImages(product?.images);
     }
   }
@@ -311,8 +311,6 @@ export class EditProductComponent implements OnInit {
             });
             this.imageIds = [];
             this.selectedImageId = 0;
-
-            console.log(this.form);
 
             this.manageFormAfterEdit(result);
           },

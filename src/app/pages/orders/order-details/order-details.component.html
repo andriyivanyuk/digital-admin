@@ -58,6 +58,20 @@
           </div>
           }
         </div>
+
+        <div class="col-lg-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Статус замовлення</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select [formControl]="statusControl">
+              @for (status of (orderStatuses$ | async); track status.status_id)
+              {
+              <mat-option [value]="status.status_id">
+                {{ status.status_name }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
 
       <div class="m-t-12 d-flex justify-content-end gap-16">

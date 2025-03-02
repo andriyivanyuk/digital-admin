@@ -54,7 +54,7 @@ export class AppSideLoginComponent implements OnInit {
 
     this.authService.login(request).subscribe({
       next: (result) => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/orders/order-list']);
         this.tokenStorage.saveToken(result.token);
         this.tokenStorage.setUserSession(result);
       },

@@ -10,6 +10,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { FormGroup } from '@angular/forms';
 import { OrderService } from '../services/order.service';
 import { ViewOrder } from '../model/viewOrder';
+import { WebSocketService } from 'src/app/services/websocket.service';
 
 @Component({
   selector: 'app-order-list',
@@ -41,6 +42,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
   readonly loader = inject(NgxUiLoaderService);
 
   readonly orderService = inject(OrderService);
+  readonly webSocketService = inject(WebSocketService);
 
   public getProducts(): void {
     this.loader.start();
@@ -65,14 +67,31 @@ export class OrderListComponent implements OnInit, OnDestroy {
     this.subscriptions.add(subscription);
   }
 
+  public handleCurrentOrder() {
+    this.webSocketService.onNewOrder().subscribe((order) => {
+      this.snackBar
+        .open('Нове замовлення отримано! Перевірте деталі.', 'Переглянути', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        })
+        .onAction()
+        .subscribe(() => {
+          this.getProducts();
+        });
+    });
+  }
+
   public editOrder(id: number) {
     this.router.navigate(['/orders/order-details', id]);
   }
 
   ngOnInit(): void {
+    this.handleCurrentOrder();
     this.getProducts();
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.webSocketService.disconnect();
   }
 }
