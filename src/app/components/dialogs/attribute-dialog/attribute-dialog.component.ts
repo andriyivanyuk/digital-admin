@@ -31,13 +31,13 @@ export class AttributeDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<AttributeDialogComponent>
   ) {}
 
-  save(): void {
+  public save(): void {
     if (this.form.valid) {
       this.dialogRef.close(this.form.value);
     }
   }
 
-  close(): void {
+  public close(): void {
     this.dialogRef.close();
   }
 

@@ -9,7 +9,7 @@ import {
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
+import { AttributeDialogComponent } from 'src/app/components/dialogs/attribute-dialog/attribute-dialog.component';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
@@ -230,7 +230,7 @@ export class EditProductComponent implements OnInit {
     const newImages = result.product.images;
     if (newImages && newImages.length) {
       newImages.forEach((image) => {
-        const fullPath = `http://localhost:5000/${image.image_path}`;
+        const fullPath = `http://localhost:5500/${image.image_path}`;
         const imageGroup = this.fb.group({
           file: [null],
           path: [fullPath],

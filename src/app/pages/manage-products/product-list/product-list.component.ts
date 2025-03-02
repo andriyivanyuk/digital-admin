@@ -80,7 +80,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   public openDialog(id: number): void {
     const dialogRef = this.dialog.open(DeleteDialogComponent, {
-      width: '250px',
+      width: '450px',
     });
 
     const dialogSubscription = dialogRef

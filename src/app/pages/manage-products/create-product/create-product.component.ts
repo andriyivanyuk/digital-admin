@@ -10,7 +10,7 @@ import {
 
 import { MatDialog } from '@angular/material/dialog';
 
-import { AttributeDialogComponent } from 'src/app/components/attribute-dialog/attribute-dialog.component';
+import { AttributeDialogComponent } from 'src/app/components/dialogs/attribute-dialog/attribute-dialog.component';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
 import { BehaviorSubject, Observable } from 'rxjs';

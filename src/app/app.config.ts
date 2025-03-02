@@ -32,6 +32,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideClientHydration(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
@@ -47,7 +48,6 @@ export const appConfig: ApplicationConfig = {
       useClass: AuthInterceptor,
       multi: true,
     },
-    provideClientHydration(),
     provideAnimationsAsync(),
     importProvidersFrom(
       FormsModule,
