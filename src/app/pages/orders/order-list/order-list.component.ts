@@ -69,6 +69,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   public handleCurrentOrder() {
     this.webSocketService.onNewOrder().subscribe((order) => {
+      
       this.snackBar
         .open('Нове замовлення отримано! Перевірте деталі.', 'Переглянути', {
           duration: 5000,

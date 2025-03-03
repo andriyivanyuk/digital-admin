@@ -8,6 +8,7 @@ import { MaterialModule } from 'src/app/material.module';
 import { User } from 'src/app/pages/authentication/models/user';
 import { AuthService } from '../services/auth.service';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-side-register',
@@ -20,6 +21,7 @@ export class AppSideRegisterComponent {
 
   constructor(private settings: CoreService, private router: Router) {}
 
+  readonly snackBar = inject(MatSnackBar);
   readonly loader = inject(NgxUiLoaderService);
   readonly authService = inject(AuthService);
 
@@ -47,6 +49,9 @@ export class AppSideRegisterComponent {
       this.authService.register(request).subscribe({
         next: (result) => {
           this.loader.stop();
+          this.snackBar.open(result.status, 'Закрити', {
+            duration: 8000,
+          });
           this.router.navigate(['authentication/login']);
         },
         error: (error) => {

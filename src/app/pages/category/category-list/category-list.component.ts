@@ -43,7 +43,6 @@ export class CategoryListComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe((result) => {
-        console.log(result);
         this.loader.stop();
         this.dataSource.data = result;
         if (result.length) {
@@ -67,7 +66,6 @@ export class CategoryListComponent implements OnInit, OnDestroy {
           duration: 3000,
         });
         this.getCategories();
-        console.log(result);
       },
       error: (error) => {
         this.loader.stop();

@@ -106,7 +106,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.loader.stop();
-          console.error(error);
+          console.log(error);
+          this.snackBar.open(error.error.message, 'Закрити', {
+            duration: 5000,
+          });
         },
       });
 
