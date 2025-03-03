@@ -32,6 +32,13 @@ export const routes: Routes = [
             (m) => m.manageOrdersRoutes
           ),
       },
+      {
+        path: 'categories',
+        loadChildren: () =>
+          import('./pages/category/category.routes').then(
+            (m) => m.categoryRoutes
+          ),
+      },
     ],
     canActivate: [AuthGuard],
   },

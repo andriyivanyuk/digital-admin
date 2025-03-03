@@ -114,6 +114,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   public getProducts(value: string = ''): void {
+    this.loader.start();
     const subscription = this.productService
       .getProducts(this.page, this.limit, value)
       .pipe(
@@ -145,7 +146,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.createForm();
-    this.loader.start();
     this.getProducts();
 
     this.form.valueChanges

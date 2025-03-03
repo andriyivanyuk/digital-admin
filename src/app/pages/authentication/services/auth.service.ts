@@ -2,9 +2,9 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { LoginRequest } from '../models/loginRequest';
+import { LoginRequest } from '../../../models/loginRequest';
 import { User } from '../models/user';
-import { LoginResponse } from '../models/loginResponse';
+import { LoginResponse } from '../../../models/loginResponse';
 
 @Injectable()
 export class AuthService {

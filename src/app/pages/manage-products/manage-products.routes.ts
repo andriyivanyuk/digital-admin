@@ -7,7 +7,7 @@ import { AppTooltipsComponent } from './tooltips/tooltips.component';
 import { AppFormsComponent } from './forms/forms.component';
 import { AppTablesComponent } from './tables/tables.component';
 import { CreateProductComponent } from './create-product/create-product.component';
-import { CreateCategoryComponent } from './create-category/create-category.component';
+import { CreateCategoryComponent } from '../category/create-category/create-category.component';
 import { ProductListComponent } from './product-list/product-list.component';
 import { EditProductComponent } from './edit-product/edit-product.component';
 

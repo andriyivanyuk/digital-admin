@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -11,8 +11,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
-import { CategoryService } from 'src/app/services/category.service';
+import { CategoryService } from 'src/app/pages/category/services/category.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-create-category',
@@ -32,11 +33,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class CreateCategoryComponent implements OnInit {
   form!: FormGroup;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private categoryService: CategoryService,
-    private snackBar: MatSnackBar
-  ) {}
+  readonly snackBar = inject(MatSnackBar);
+  readonly loader = inject(NgxUiLoaderService);
+  readonly formBuilder = inject(FormBuilder);
+
+  readonly categoryService = inject(CategoryService);
 
   private createForm() {
     this.form = this.formBuilder.group({
@@ -48,18 +49,21 @@ export class CreateCategoryComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
+    this.loader.start();
     const request: any = {
       title: this.form.value.title,
       description: this.form.value.description,
     };
     this.categoryService.createCategory(request).subscribe({
       next: () => {
+        this.loader.stop();
         this.snackBar.open('Категорію додано', 'Закрити', {
           duration: 3000,
         });
         this.form.reset();
       },
       error: (error) => {
+        this.loader.stop();
         console.log(error);
       },
     });

@@ -31,7 +31,6 @@ import { UpdateOrderStatus } from '../model/updateOrderRequest';
     TablerIconsModule,
     CommonModule,
     MaterialModule,
-    MatDialogModule,
   ],
   providers: [OrderService],
 })

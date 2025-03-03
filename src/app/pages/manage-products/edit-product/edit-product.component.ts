@@ -7,17 +7,17 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 import { AttributeDialogComponent } from 'src/app/components/dialogs/attribute-dialog/attribute-dialog.component';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
-import { CategoryService } from 'src/app/services/category.service';
+import { CategoryService } from 'src/app/pages/category/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
 import { CommonModule } from '@angular/common';
-import { Category } from 'src/app/models/category';
+import { Category } from 'src/app/pages/category/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MaterialModule } from 'src/app/material.module';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -36,7 +36,6 @@ import { ProductAttribute } from 'src/app/models/productResponse';
     TablerIconsModule,
     CommonModule,
     MaterialModule,
-    MatDialogModule,
   ],
   providers: [ProductStatusService, CategoryService, ProductService],
 })
@@ -68,6 +67,9 @@ export class EditProductComponent implements OnInit {
 
   imageIds: number[] = [];
   selectedImageId: number = 0;
+  selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'не вибрано'
+  );
 
   ngOnInit(): void {
     this.statuses$ = this.productStatusService.statuses$;
@@ -92,10 +94,6 @@ export class EditProductComponent implements OnInit {
       images: this.fb.array([], minImageCountValidator(1)),
     });
   }
-
-  selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
-    'не вибрано'
-  );
 
   public onFileSelect(event: Event) {
     const element = event.currentTarget as HTMLInputElement;

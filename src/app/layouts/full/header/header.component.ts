@@ -13,9 +13,9 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { TokenStorageService } from 'src/app/services/token-storage.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/pages/authentication/services/auth.service';
 import { Observable } from 'rxjs';
-import { User } from 'src/app/models/user';
+import { User } from 'src/app/pages/authentication/models/user';
 
 @Component({
   selector: 'app-header',

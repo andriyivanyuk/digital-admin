@@ -5,9 +5,11 @@ import { RouterModule } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/pages/authentication/services/auth.service';
 import { LoginRequest } from 'src/app/models/loginRequest';
 import { TokenStorageService } from 'src/app/services/token-storage.service';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-side-login',
@@ -18,11 +20,12 @@ import { TokenStorageService } from 'src/app/services/token-storage.service';
 export class AppSideLoginComponent implements OnInit {
   form!: FormGroup;
 
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private tokenStorage: TokenStorageService
-  ) {}
+  readonly loader = inject(NgxUiLoaderService);
+  readonly snackBar = inject(MatSnackBar);
+
+  readonly authService = inject(AuthService);
+  readonly router = inject(Router);
+  readonly tokenStorage = inject(TokenStorageService);
 
   ngOnInit(): void {
     this.createForm();
@@ -47,6 +50,8 @@ export class AppSideLoginComponent implements OnInit {
       return;
     }
 
+    this.loader.start();
+
     const request: LoginRequest = {
       email: this.form.value.email || '',
       password: this.form.value.password || '',
@@ -54,12 +59,16 @@ export class AppSideLoginComponent implements OnInit {
 
     this.authService.login(request).subscribe({
       next: (result) => {
+        this.loader.stop();
         this.router.navigate(['/orders/order-list']);
         this.tokenStorage.saveToken(result.token);
         this.tokenStorage.setUserSession(result);
       },
       error: (error) => {
-        console.log(error);
+        this.loader.stop();
+        this.snackBar.open(error.error, 'Закрити', {
+          duration: 4000,
+        });
       },
     });
   }

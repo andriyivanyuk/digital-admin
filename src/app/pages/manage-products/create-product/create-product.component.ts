@@ -13,12 +13,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { AttributeDialogComponent } from 'src/app/components/dialogs/attribute-dialog/attribute-dialog.component';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ProductStatus } from 'src/app/models/productStatus';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, takeUntil } from 'rxjs';
 import { ProductStatusService } from 'src/app/services/status.service';
-import { CategoryService } from 'src/app/services/category.service';
+import { CategoryService } from 'src/app/pages/category/services/category.service';
 import { ProductService } from 'src/app/services/products.service';
 import { CommonModule } from '@angular/common';
-import { Category } from 'src/app/models/category';
+import { Category } from 'src/app/pages/category/models/category';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { MaterialModule } from 'src/app/material.module';
@@ -38,6 +38,8 @@ import { minImageCountValidator } from 'src/app/validators/min-image-count.valid
   providers: [ProductStatusService, CategoryService, ProductService],
 })
 export class CreateProductComponent implements OnInit {
+  private destroy$ = new Subject<void>();
+
   form!: FormGroup;
   imageActive: boolean = true;
 
@@ -56,6 +58,13 @@ export class CreateProductComponent implements OnInit {
   selectedImageName: BehaviorSubject<string> = new BehaviorSubject<string>(
     'не вибрано'
   );
+
+  ngOnInit(): void {
+    this.statuses$ = this.productStatusService.statuses$;
+    this.categories$ = this.categoryService.getCategories();
+    this.createForm();
+    this.prefillForm();
+  }
 
   get attributes(): FormArray {
     return this.form.get('attributes') as FormArray;
@@ -103,11 +112,19 @@ export class CreateProductComponent implements OnInit {
   }
 
   public prefillForm() {
-    this.productStatusService.statuses$.subscribe({
+    this.statuses$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (result) => {
         const status = result.find((status) => status.status_id);
         if (status) {
           this.form.controls['status_id'].reset(status.status_id);
+        }
+      },
+    });
+    this.categories$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        const category = result.find((category) => category.category_id);
+        if (category) {
+          this.form.controls['category_id'].reset(category.category_id);
         }
       },
     });
@@ -196,12 +213,5 @@ export class CreateProductComponent implements OnInit {
         },
       });
     }
-  }
-
-  ngOnInit(): void {
-    this.statuses$ = this.productStatusService.statuses$;
-    this.categories$ = this.categoryService.getCategories();
-    this.createForm();
-    this.prefillForm();
   }
 }
