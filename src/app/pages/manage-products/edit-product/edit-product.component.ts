@@ -83,7 +83,7 @@ export class EditProductComponent implements OnInit {
   public createForm() {
     this.form = this.fb.group({
       product_id: [0],
-      title: ['', [Validators.required, Validators.maxLength(255)]],
+      title: ['', [Validators.required]],
       price: [null, [Validators.required]],
       stock: [null, [Validators.required]],
       status_id: [null, [Validators.required]],
@@ -131,8 +131,6 @@ export class EditProductComponent implements OnInit {
   public deleteImage(index: number, image: any) {
     this.images.removeAt(index);
 
-    // this.setPrimaryImage(0, this.images.at(0));
-
     if (this.images.length === 0) {
       this.form.patchValue({ primary: index });
       this.selectedImageName.next('Будь ласка, оберіть головне фото');
@@ -175,7 +173,12 @@ export class EditProductComponent implements OnInit {
     }
     if (!!product.images?.length) {
       this.setImages(product?.images);
+      const primaryIndex = product.images.findIndex(
+        (image) => image.is_primary === true
+      );
+      this.setPrimaryImage(primaryIndex, this.images.at(primaryIndex));
     }
+    this.form.updateValueAndValidity();
   }
 
   public setImages(images: any[]): void {
@@ -201,8 +204,8 @@ export class EditProductComponent implements OnInit {
       attributes.forEach((attr) => {
         attributesFormArray.push(
           this.fb.group({
-            key: [attr.key, Validators.required],
-            value: [attr.value, Validators.required],
+            key: [attr.key],
+            value: [attr.value],
           })
         );
       });
