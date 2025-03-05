@@ -1,4 +1,5 @@
-import { ProductAttribute, ProductImage } from './productResponse';
+import { ProductAttribute } from '../pages/manage-products/models/productAttribute';
+import { ProductImage } from './UpdatedProductResponse';
 
 export interface Product {
   product_id: number;

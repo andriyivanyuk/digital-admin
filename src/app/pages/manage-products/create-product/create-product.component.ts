@@ -178,25 +178,6 @@ export class CreateProductComponent implements OnInit {
     this.attributes.removeAt(lessonIndex);
   }
 
-  public prefillForm() {
-    this.statuses$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (result) => {
-        const status = result.find((status) => status.status_id);
-        if (status) {
-          this.form.controls['status_id'].reset(status.status_id);
-        }
-      },
-    });
-    this.categories$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (result) => {
-        const category = result.find((category) => category.category_id);
-        if (category) {
-          this.form.controls['category_id'].reset(category.category_id);
-        }
-      },
-    });
-  }
-
   public onFileSelect(event: Event) {
     const element = event.currentTarget as HTMLInputElement;
     let files = element.files;
@@ -236,6 +217,38 @@ export class CreateProductComponent implements OnInit {
     this.form.patchValue({ primary: index });
   }
 
+  public clear() {
+    this.form.reset();
+  }
+
+  public mapValuesAttributes(array: any[]) {
+    return array.map((item) => ({
+      key: item.title,
+      values: item.attributeValues.map(
+        (value: any) => value.attributeValueTitle
+      ),
+    }));
+  }
+
+  public prefillForm() {
+    this.statuses$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        const status = result.find((status) => status.status_id);
+        if (status) {
+          this.form.controls['status_id'].reset(status.status_id);
+        }
+      },
+    });
+    this.categories$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        const category = result.find((category) => category.category_id);
+        if (category) {
+          this.form.controls['category_id'].reset(category.category_id);
+        }
+      },
+    });
+  }
+
   public createProduct() {
     if (this.form.valid) {
       this.loader.start();
@@ -260,10 +273,8 @@ export class CreateProductComponent implements OnInit {
         }
       });
 
-      this.form.value.attributes.forEach((attr: any, index: number) => {
-        formData.append(`attributes[${index}][key]`, attr.key);
-        formData.append(`attributes[${index}][value]`, attr.value);
-      });
+      const attributes = this.mapValuesAttributes(this.attributes.value);
+      formData.append('attributes', JSON.stringify(attributes));
 
       this.productService.addProduct(formData).subscribe({
         next: () => {

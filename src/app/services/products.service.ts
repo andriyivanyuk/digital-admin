@@ -3,9 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { UpdateProductResponse } from '../models/UpdatedProductResponse';
 import { ProductImage } from '../models/productImage';
-import { ProductResponse } from '../models/productResponse';
+// import { ProductResponse } from '../models/productResponse';
 import { ViewProduct } from '../models/ViewProduct';
-import { Product } from '../models/product';
+import { ProductResponse } from '../models/ProductResponse';
+import { Product } from '../models/Product';
+// import { Product } from '../models/product';
 
 @Injectable()
 export class ProductService {
@@ -26,22 +28,20 @@ export class ProductService {
       params = params.set('search', search);
     }
 
-    return this.http
-      .get<ProductResponse>(`${this.apiUrl}/products`, { params })
-      .pipe(
-        map((result) => ({
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          products: result.products.map((product) => ({
-            ...product,
-            images: product.images?.map((image: ProductImage) => ({
-              ...image,
-              fullPath: `http://localhost:5500/${image.image_path}`,
-            })),
+    return this.http.get<any>(`${this.apiUrl}/products`, { params }).pipe(
+      map((result) => ({
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        products: result.products.map((product: any) => ({
+          ...product,
+          images: product.images?.map((image: ProductImage) => ({
+            ...image,
+            fullPath: `http://localhost:5500/${image.image_path}`,
           })),
-        }))
-      );
+        })),
+      }))
+    );
   }
 
   public mapProducts(products: any[]): ViewProduct[] {

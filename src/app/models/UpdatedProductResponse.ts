@@ -1,8 +1,6 @@
-import { Product } from './product';
-
 export interface UpdateProductResponse {
   message: string;
-  product: Product;
+  product: any;
 }
 
 export interface ProductImage {

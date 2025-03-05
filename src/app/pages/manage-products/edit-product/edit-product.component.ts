@@ -24,8 +24,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { UpdateProductResponse } from 'src/app/models/UpdatedProductResponse';
 import { minImageCountValidator } from 'src/app/validators/min-image-count.validator';
-import { Product } from 'src/app/models/product';
-import { ProductAttribute } from 'src/app/models/productResponse';
+import { Product } from 'src/app/models/Product';
+// import { Product } from 'src/app/models/product';
+// import { ProductAttribute } from 'src/app/models/productResponse';
 
 @Component({
   selector: 'app-edit-product',
@@ -198,7 +199,7 @@ export class EditProductComponent implements OnInit {
     }
   }
 
-  public setAttributes(attributes: ProductAttribute[]): void {
+  public setAttributes(attributes: any[]): void {
     if (attributes?.length) {
       const attributesFormArray = this.attributes as FormArray;
       attributes.forEach((attr) => {
@@ -230,7 +231,7 @@ export class EditProductComponent implements OnInit {
 
     const newImages = result.product.images;
     if (newImages && newImages.length) {
-      newImages.forEach((image) => {
+      newImages.forEach((image: any) => {
         const fullPath = `http://localhost:5500/${image.image_path}`;
         const imageGroup = this.fb.group({
           file: [null],
