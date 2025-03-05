@@ -1,4 +1,5 @@
 .attribute-add {
+  // margin-top: 16px;
   cursor: pointer;
 }
 
@@ -25,6 +26,24 @@
 
 .empty-img-error {
   color: #d32f2f;
+}
+
+.attribute-row {
+  margin-top: 16px;
+}
+
+.form-field {
+  max-width: 400px;
+}
+
+.attribute-label {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+
+  .trash-icon {
+    margin-top: -25px;
+  }
 }
 
 mat-icon {

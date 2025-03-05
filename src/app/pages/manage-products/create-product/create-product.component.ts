@@ -66,10 +66,6 @@ export class CreateProductComponent implements OnInit {
     this.prefillForm();
   }
 
-  get attributes(): FormArray {
-    return this.form.get('attributes') as FormArray;
-  }
-
   get images(): FormArray {
     return this.form.get('images') as FormArray;
   }
@@ -93,18 +89,89 @@ export class CreateProductComponent implements OnInit {
     });
   }
 
+  get attributes(): FormArray {
+    return this.form.get('attributes') as FormArray;
+  }
+
+  attributeForms: FormGroup[][] = [];
+
+  public addAttributeControl(key: string, attributes: string[]) {
+    const attributeForm = this.fb.group({
+      title: [key, Validators.required],
+      attributeValues: this.fb.array([]),
+    });
+
+    const attributeValuesArray = attributeForm.get(
+      'attributeValues'
+    ) as FormArray;
+    this.attributeForms.push([]);
+
+    attributes.forEach((attr) => {
+      const valueForm = this.fb.group({
+        attributeValueTitle: [attr, Validators.required],
+      });
+      attributeValuesArray.push(valueForm);
+      this.attributeForms[this.attributeForms.length - 1].push(valueForm);
+    });
+
+    this.attributes.push(attributeForm);
+  }
+
+  get attributeFormGroups(): FormGroup[] {
+    return this.attributes.controls as FormGroup[];
+  }
+
+  public deleteAttributeControl(index: number) {
+    this.attributeForms.splice(index, 1);
+    this.attributes.removeAt(index);
+  }
+
+  public deleteAttributeValue(
+    attributeIndex: number,
+    valueIndex: number
+  ): void {
+    const attributeValues = this.attributes
+      .at(attributeIndex)
+      .get('attributeValues') as FormArray;
+    if (attributeValues && attributeValues.length > valueIndex) {
+      attributeValues.removeAt(valueIndex);
+      this.attributeForms[attributeIndex].splice(valueIndex, 1);
+    }
+  }
+
+  public getAttributeValues(attributeForm: FormGroup): FormGroup[] {
+    return (attributeForm.get('attributeValues') as FormArray)
+      .controls as FormGroup[];
+  }
+
   public addAttribute(): void {
-    const dialogRef = this.dialog.open(AttributeDialogComponent);
+    const dialogRef = this.dialog.open(AttributeDialogComponent, {
+      width: '600px',
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        const fieldGroup = this.fb.group({
-          key: result.key,
-          value: result.value,
-        });
-        this.attributes.push(fieldGroup);
+        const attributes = result.attributeValues.filter(
+          (item: string) => !!item
+        );
+
+        this.addAttributeControl(result.key, attributes);
       }
     });
+  }
+
+  public addAttributeValue(attributeIndex: number): void {
+    const attributeForm = this.attributes.at(attributeIndex) as FormGroup;
+    const attributeValuesArray = attributeForm.get(
+      'attributeValues'
+    ) as FormArray;
+
+    const newValueForm = this.fb.group({
+      attributeValueTitle: ['', Validators.required],
+    });
+
+    attributeValuesArray.push(newValueForm);
+    this.attributeForms[attributeIndex].push(newValueForm);
   }
 
   public deleteAttribute(lessonIndex: number) {

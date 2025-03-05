@@ -14,18 +14,36 @@
 
         <div class="col-12">
           <mat-label class="f-w-600 m-b-8 d-block">Значення</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Fruit selection">
+            @for (item of attributeValues(); track $index) { @if(item) {
+            <mat-chip-row (removed)="remove(item)">
+              {{ item }}
+              <button matChipRemove [attr.aria-label]="'remove ' + item">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+            } }
+          </mat-chip-grid>
           <mat-form-field appearance="outline" class="w-100" color="primary">
-            <input formControlName="value" matInput placeholder="Значення" />
+            <input
+              [matChipInputFor]="chipGrid"
+              (matChipInputTokenEnd)="add($event)"
+              matInput
+              placeholder="Введіть значення та натисніть Enter"
+              formControlName="attributeValue"
+            />
           </mat-form-field>
         </div>
       </div>
 
-      <div class="m-t-12 btn-group" (click)="save()">
+      <div class="m-t-12 btn-group">
         <button
+          (click)="save()"
           mat-flat-button
           color="primary"
           class="m-r-8"
-          [disabled]="form.invalid">
+          [disabled]="form.invalid || !filled()"
+        >
           Додати
         </button>
         <button mat-stroked-button color="warn" (click)="close()">
