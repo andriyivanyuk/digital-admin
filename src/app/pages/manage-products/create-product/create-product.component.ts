@@ -39,6 +39,7 @@ import { minImageCountValidator } from 'src/app/validators/min-image-count.valid
 })
 export class CreateProductComponent implements OnInit {
   private destroy$ = new Subject<void>();
+  attributeForms: FormGroup[][] = [];
 
   form!: FormGroup;
   imageActive: boolean = true;
@@ -93,8 +94,6 @@ export class CreateProductComponent implements OnInit {
     return this.form.get('attributes') as FormArray;
   }
 
-  attributeForms: FormGroup[][] = [];
-
   public addAttributeControl(key: string, attributes: string[]) {
     const attributeForm = this.fb.group({
       title: [key, Validators.required],
@@ -139,11 +138,6 @@ export class CreateProductComponent implements OnInit {
     }
   }
 
-  public getAttributeValues(attributeForm: FormGroup): FormGroup[] {
-    return (attributeForm.get('attributeValues') as FormArray)
-      .controls as FormGroup[];
-  }
-
   public addAttribute(): void {
     const dialogRef = this.dialog.open(AttributeDialogComponent, {
       width: '600px',
@@ -170,7 +164,10 @@ export class CreateProductComponent implements OnInit {
       attributeValueTitle: ['', Validators.required],
     });
 
+    console.log(this.attributeForms);
+
     attributeValuesArray.push(newValueForm);
+    // console.log(attributeIndex, this.attributeForms[attributeIndex]);
     this.attributeForms[attributeIndex].push(newValueForm);
   }
 
@@ -274,7 +271,9 @@ export class CreateProductComponent implements OnInit {
       });
 
       const attributes = this.mapValuesAttributes(this.attributes.value);
-      formData.append('attributes', JSON.stringify(attributes));
+      if (!!attributes?.length) {
+        formData.append('attributes', JSON.stringify(attributes));
+      }
 
       this.productService.addProduct(formData).subscribe({
         next: () => {

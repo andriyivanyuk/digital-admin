@@ -60,7 +60,7 @@ export class ProductService {
     });
   }
 
-  public getProductById(productId: number): Observable<Product> {
+  public getProductById(productId: number): Observable<any> {
     return this.http.get<Product>(`${this.apiUrl}/product/${productId}`);
   }
 

@@ -25,8 +25,6 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { UpdateProductResponse } from 'src/app/models/UpdatedProductResponse';
 import { minImageCountValidator } from 'src/app/validators/min-image-count.validator';
 import { Product } from 'src/app/models/Product';
-// import { Product } from 'src/app/models/product';
-// import { ProductAttribute } from 'src/app/models/productResponse';
 
 @Component({
   selector: 'app-edit-product',
@@ -42,6 +40,7 @@ import { Product } from 'src/app/models/Product';
 })
 export class EditProductComponent implements OnInit {
   form!: FormGroup;
+  attributeForms: FormGroup[][] = [];
 
   statuses$!: Observable<ProductStatus[]>;
   categories$!: Observable<Category[]>;
@@ -96,6 +95,86 @@ export class EditProductComponent implements OnInit {
     });
   }
 
+  public addAttributeControl(key: string, attributes: string[]) {
+    const attributeForm = this.fb.group({
+      attribute_id: [],
+      key: [key, Validators.required],
+      attributeValues: this.fb.array([]),
+    });
+
+    const attributeValuesArray = attributeForm.get(
+      'attributeValues'
+    ) as FormArray;
+    this.attributeForms.push([]);
+
+    attributes.forEach((attr) => {
+      const valueForm = this.fb.group({
+        value_id: [],
+        value: [attr, Validators.required],
+      });
+      attributeValuesArray.push(valueForm);
+      this.attributeForms[this.attributeForms.length - 1].push(valueForm);
+    });
+
+    this.attributes.push(attributeForm);
+  }
+
+  get attributeFormGroups(): FormGroup[] {
+    return this.attributes.controls as FormGroup[];
+  }
+
+  public deleteAttributeControl(index: number) {
+    this.attributeForms.splice(index, 1);
+    this.attributes.removeAt(index);
+  }
+
+  public deleteAttributeValue(
+    attributeIndex: number,
+    valueIndex: number
+  ): void {
+    const attributeValues = this.attributes
+      .at(attributeIndex)
+      .get('attributeValues') as FormArray;
+    if (attributeValues && attributeValues.length > valueIndex) {
+      attributeValues.removeAt(valueIndex);
+      this.attributeForms[attributeIndex].splice(valueIndex, 1);
+    }
+    
+  }
+
+  public addAttributeValue(attributeIndex: number): void {
+    const attributeForm = this.attributes.at(attributeIndex) as FormGroup;
+    const attributeValuesArray = attributeForm.get(
+      'attributeValues'
+    ) as FormArray;
+
+    const newValueForm = this.fb.group({
+      value: ['', Validators.required],
+      value_id: [null],
+    });
+
+    attributeValuesArray.push(newValueForm);
+
+    this.attributeForms[attributeIndex].push(newValueForm);
+
+  }
+
+  public addAttribute(): void {
+    const dialogRef = this.dialog.open(AttributeDialogComponent, {
+      width: '600px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        const attributes = result.attributeValues.filter(
+          (item: string) => !!item
+        );
+
+        this.addAttributeControl(result.key, attributes);
+      }
+    });
+  }
+
   public onFileSelect(event: Event) {
     const element = event.currentTarget as HTMLInputElement;
     let files = element.files;
@@ -144,24 +223,6 @@ export class EditProductComponent implements OnInit {
     }
   }
 
-  public addAttribute(): void {
-    const dialogRef = this.dialog.open(AttributeDialogComponent);
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const fieldGroup = this.fb.group({
-          key: result.key,
-          value: result.value,
-        });
-        this.attributes.push(fieldGroup);
-      }
-    });
-  }
-
-  public deleteAttribute(lessonIndex: number) {
-    this.attributes.removeAt(lessonIndex);
-  }
-
   public prefillForm(product: Product) {
     this.form.controls['title'].reset(product.title);
     this.form.controls['price'].reset(product.price);
@@ -201,14 +262,13 @@ export class EditProductComponent implements OnInit {
 
   public setAttributes(attributes: any[]): void {
     if (attributes?.length) {
-      const attributesFormArray = this.attributes as FormArray;
       attributes.forEach((attr) => {
-        attributesFormArray.push(
-          this.fb.group({
-            key: [attr.key],
-            value: [attr.value],
-          })
-        );
+        if (attr?.values?.length) {
+          const mapped = attr.values.map((item: any) => {
+            return item.value;
+          });
+          this.addAttributeControl(attr.key, mapped);
+        }
       });
     }
   }
@@ -250,6 +310,13 @@ export class EditProductComponent implements OnInit {
     }
   }
 
+  public mapValuesAttributes(array: any[]) {
+    return array.map((item) => ({
+      key: item.key,
+      values: item.attributeValues.map((item: any) => item.value),
+    }));
+  }
+
   public getProductById(id: number) {
     this.loader.start();
     this.productService.getProductById(id).subscribe({
@@ -280,17 +347,17 @@ export class EditProductComponent implements OnInit {
 
       formData.append('selectedImageId', JSON.stringify(this.selectedImageId));
 
+      const attributes = this.mapValuesAttributes(this.attributes.value);
+      if (!!attributes?.length) {
+        formData.append('attributes', JSON.stringify(attributes));
+      }
+
       const images = this.images.controls;
       images.forEach((imageControl, index) => {
         const file = imageControl.get('file')!.value;
         if (file) {
           formData.append('images', file, file.name);
         }
-      });
-
-      this.form.value.attributes.forEach((attr: any, index: number) => {
-        formData.append(`attributes[${index}][key]`, attr.key);
-        formData.append(`attributes[${index}][value]`, attr.value);
       });
 
       this.productService
