@@ -139,7 +139,9 @@ export class EditProductComponent implements OnInit {
       attributeValues.removeAt(valueIndex);
       this.attributeForms[attributeIndex].splice(valueIndex, 1);
     }
-    
+    if (valueIndex === 0) {
+      this.deleteAttributeControl(attributeIndex);
+    }
   }
 
   public addAttributeValue(attributeIndex: number): void {
@@ -156,7 +158,6 @@ export class EditProductComponent implements OnInit {
     attributeValuesArray.push(newValueForm);
 
     this.attributeForms[attributeIndex].push(newValueForm);
-
   }
 
   public addAttribute(): void {

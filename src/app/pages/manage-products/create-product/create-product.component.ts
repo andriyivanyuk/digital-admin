@@ -164,10 +164,7 @@ export class CreateProductComponent implements OnInit {
       attributeValueTitle: ['', Validators.required],
     });
 
-    console.log(this.attributeForms);
-
     attributeValuesArray.push(newValueForm);
-    // console.log(attributeIndex, this.attributeForms[attributeIndex]);
     this.attributeForms[attributeIndex].push(newValueForm);
   }
 
